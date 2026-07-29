@@ -41,5 +41,5 @@ See [docs/dev.md](docs/dev.md) for the development guide.
 ---
 
 Built in collaboration with [Kilo](https://kilo.ai) — an AI pair programmer
-that writes code, runs tests, and updates docs so humans can focus on what
+that writes code, runs tests, and updates docs so humans can focus on what 🍺
 matters.
