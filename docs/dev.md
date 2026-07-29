@@ -15,8 +15,7 @@ Open [http://127.0.0.1:8001](http://127.0.0.1:8001).
 2. Add the handler in `app/main.py`
 3. If you need a new DB column, create a migration:
    ```bash
-   docker compose exec app alembic revision --autogenerate -m "add field"
-   docker compose exec app alembic upgrade head
+   make migrate-auto m="add field"
    ```
 4. Rebuild the image: `docker compose build app`
 
@@ -26,6 +25,35 @@ Open [http://127.0.0.1:8001](http://127.0.0.1:8001).
 2. Run `alembic revision --autogenerate -m "add new_table"`
 3. Review the migration file in `alembic/versions/`
 4. Run `alembic upgrade head`
+
+## Testing
+
+Tests use **pytest** + **pytest-asyncio** + **httpx** (ASGI transport for the
+FastAPI app, no real network). A dedicated `db-test` PostgreSQL container runs
+alongside the main one — its data is ephemeral (tmpfs) and resets on restart.
+
+### Running tests
+
+```bash
+make test
+```
+
+This single command will:
+1. Build and start all containers (`docker compose up --build -d`)
+2. Create the test directories inside the app container
+3. Run pytest with all required env vars
+
+Tests auto-create/drop the schema per run via SQLAlchemy metadata. A dedicated
+`db-test` PostgreSQL container runs alongside the main one — its data is
+ephemeral (tmpfs) and resets on restart.
+
+## TDD workflow
+
+1. Write a failing test in `tests/`
+2. Run the tests with the command above — new test fails
+3. Implement the feature in `app/`
+4. Run tests again — all pass
+5. Repeat
 
 ## Code style
 

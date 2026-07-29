@@ -14,6 +14,13 @@ docker compose up --build
 docker compose exec app alembic upgrade head
 ```
 
+Or with the Makefile:
+
+```bash
+make up-build
+make migrate
+```
+
 Open [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---

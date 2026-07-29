@@ -8,6 +8,7 @@ Prerequisites: **Docker** and **Docker Compose**.
 
 ```bash
 docker compose up --build
+# or: make up-build
 ```
 
 This starts two containers:
@@ -19,6 +20,7 @@ This starts two containers:
 
 ```bash
 docker compose exec app alembic upgrade head
+# or: make migrate
 ```
 
 This creates the `users` and `images` tables.
@@ -42,4 +44,5 @@ docker compose down -v    # stops and deletes all data
 ```bash
 docker compose exec app alembic revision --autogenerate -m "description"
 docker compose exec app alembic upgrade head
+# or: make migrate-auto m="description"
 ```

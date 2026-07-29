@@ -36,10 +36,20 @@ picShare/
 ```
 
 ## Running
-- `docker compose up --build` — start app + DB
-- `docker compose exec app alembic upgrade head` — run migrations
+- `make up` — start app + DB (background)
+- `make migrate` — run migrations
+- `make test` — build + test
 - `mkdocs serve -a 127.0.0.1:8001` — view docs
 - `localhost:8000/docs` — Swagger UI
+
+## Testing (TDD workflow)
+- `make test` — build, start containers, create test dirs, run pytest
+- Stack: pytest + pytest-asyncio + httpx (ASGI transport, no real network)
+- Test DB (`db-test`) is ephemeral (tmpfs) — resets on restart
+- Tests auto-create/drop schema per run via SQLAlchemy metadata
+- Test DB (`db-test`) is ephemeral (tmpfs) — resets on restart
+- Tests auto-create/drop schema per run via SQLAlchemy metadata
+- Stack: pytest + pytest-asyncio + httpx (ASGI transport, no real network)
 
 ## Session history
 - 2026-07-28: Scaffold done, docker compose works, migrations run, Swagger at /docs.
