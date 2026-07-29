@@ -1,7 +1,9 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, status, Response
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, status, Request, Response
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +15,15 @@ from app.models import User, Image
 from app.schemas import UserRegister, TokenResponse, UserOut, ImageOut, ImageUpdate
 
 app = FastAPI(title="picShare", redoc_url=None)
+
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+
+
+# ── Frontend ──
+
+@app.get("/", include_in_schema=False)
+async def homepage(request: Request):
+    return templates.TemplateResponse(request, "home.html")
 
 
 # ── Static files (serving images + local redoc bundle) ──

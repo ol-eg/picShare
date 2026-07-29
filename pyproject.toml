@@ -6,4 +6,5 @@ pythonpath = ["."]
 filterwarnings = [
     "ignore:datetime\\.datetime\\.utcnow:DeprecationWarning",
     "ignore:.*'crypt' is deprecated:DeprecationWarning",
+    "ignore:`TemplateResponse` is deprecated:DeprecationWarning",
 ]
