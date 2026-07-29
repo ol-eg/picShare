@@ -40,7 +40,10 @@
 
 ## Auth flow
 
-- `POST /register` — hash password with bcrypt → store user → return JWT
+Registration requires an `invite_code` field when the environment variable
+`PICSHARE_INVITE_CODE` is set. If unset, registration is open to anyone.
+
+- `POST /register` — validate invite code (if configured) → hash password with bcrypt → store user → return JWT
 - `POST /login` — verify password → return JWT
 - Protected endpoints use `Depends(get_current_user)` which decodes the JWT
   from the `Authorization: Bearer <token>` header

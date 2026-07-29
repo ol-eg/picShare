@@ -14,6 +14,7 @@ localhost:8001.
 - SQLAlchemy async + asyncpg
 - Alembic for migrations
 - bcrypt + JWT for auth
+- Registration gated by `PICSHARE_INVITE_CODE` env var (absent = open)
 - Pillow for thumbnails
 - MkDocs for project docs
 

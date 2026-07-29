@@ -13,7 +13,7 @@ Both are auto-generated from the Python code — no manual sync needed.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/register` | No | Create account, returns JWT |
+| POST | `/register` | No | Create account, returns JWT. Body: `invite_code` (required if `PICSHARE_INVITE_CODE` is set) |
 | POST | `/login` | No | Login, returns JWT |
 | GET | `/me` | Yes | Current user info |
 | POST | `/images` | Yes | Upload image (multipart) |

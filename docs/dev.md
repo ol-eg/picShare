@@ -32,6 +32,9 @@ Tests use **pytest** + **pytest-asyncio** + **httpx** (ASGI transport for the
 FastAPI app, no real network). A dedicated `db-test` PostgreSQL container runs
 alongside the main one — its data is ephemeral (tmpfs) and resets on restart.
 
+The test suite sets `PICSHARE_INVITE_CODE=test-invite-42` so all registration
+tests can use that value.
+
 ### Running tests
 
 ```bash

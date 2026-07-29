@@ -3,6 +3,7 @@
 DC = docker compose
 EXEC = $(DC) exec -e PICSHARE_TEST_DB_HOST=db-test \
 	-e PICSHARE_SECRET_KEY=test-secret-key \
+	-e PICSHARE_INVITE_CODE=test-invite-42 \
 	-e PICSHARE_UPLOAD_DIR=/tmp/picshare-test/uploads \
 	-e PICSHARE_THUMB_DIR=/tmp/picshare-test/thumbnails app
 

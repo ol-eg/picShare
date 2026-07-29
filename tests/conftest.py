@@ -52,6 +52,9 @@ async def client(session):
 
 @pytest.fixture
 async def auth_headers(client: AsyncClient) -> dict:
-    resp = await client.post("/register", json={"username": "testuser", "password": "secret123"})
+    resp = await client.post(
+        "/register",
+        json={"username": "testuser", "password": "secret123", "invite_code": "test-invite-42"},
+    )
     token = resp.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

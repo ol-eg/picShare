@@ -16,6 +16,10 @@ This starts two containers:
 - `picshare-app-1` — the FastAPI application on port **8000**
 - `picshare-db-1` — PostgreSQL database on port **5432**
 
+Registration requires an invite code. The default docker-compose.yml sets
+`PICSHARE_INVITE_CODE=local-dev-invite`. Change it in your production
+deployment or omit it entirely for open registration.
+
 ## 2. Run database migrations
 
 ```bash

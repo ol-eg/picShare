@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     upload_dir: str = "app/static/uploads"
     thumb_dir: str = "app/static/thumbnails"
     thumbnail_size: tuple[int, int] = (300, 300)
+    invite_code: str | None = None
 
     model_config = {"env_prefix": "PICSHARE_"}
 

@@ -9,6 +9,7 @@ from pydantic import BaseModel, constr
 class UserRegister(BaseModel):
     username: constr(min_length=3, max_length=64)
     password: constr(min_length=6, max_length=128)
+    invite_code: str | None = None
 
 
 class TokenResponse(BaseModel):

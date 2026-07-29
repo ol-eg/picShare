@@ -1,9 +1,19 @@
 import pytest
 
+INVITE_CODE = "test-invite-42"
+
+
+@pytest.mark.asyncio
+async def test_register_requires_invite_code(client):
+    resp = await client.post("/register", json={"username": "alice", "password": "password123"})
+    assert resp.status_code == 403
+
 
 @pytest.mark.asyncio
 async def test_register_success(client):
-    resp = await client.post("/register", json={"username": "alice", "password": "password123"})
+    resp = await client.post(
+        "/register", json={"username": "alice", "password": "password123", "invite_code": INVITE_CODE}
+    )
     assert resp.status_code == 201
     data = resp.json()
     assert "access_token" in data
@@ -11,15 +21,25 @@ async def test_register_success(client):
 
 
 @pytest.mark.asyncio
+async def test_register_invalid_invite_code(client):
+    resp = await client.post(
+        "/register", json={"username": "bob", "password": "password123", "invite_code": "wrong-code"}
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
 async def test_register_duplicate_username(client):
-    await client.post("/register", json={"username": "bob", "password": "password123"})
-    resp = await client.post("/register", json={"username": "bob", "password": "otherpass456"})
+    payload = {"username": "bob", "password": "password123", "invite_code": INVITE_CODE}
+    await client.post("/register", json=payload)
+    resp = await client.post("/register", json={**payload, "password": "otherpass456"})
     assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
 async def test_login_success(client):
-    await client.post("/register", json={"username": "carol", "password": "mypassword"})
+    payload = {"username": "carol", "password": "mypassword", "invite_code": INVITE_CODE}
+    await client.post("/register", json=payload)
     resp = await client.post("/login", json={"username": "carol", "password": "mypassword"})
     assert resp.status_code == 200
     data = resp.json()
@@ -28,7 +48,8 @@ async def test_login_success(client):
 
 @pytest.mark.asyncio
 async def test_login_wrong_password(client):
-    await client.post("/register", json={"username": "dave", "password": "correctpass"})
+    payload = {"username": "dave", "password": "correctpass", "invite_code": INVITE_CODE}
+    await client.post("/register", json=payload)
     resp = await client.post("/login", json={"username": "dave", "password": "wrongpass"})
     assert resp.status_code == 401
 
