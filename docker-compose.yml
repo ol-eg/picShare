@@ -31,6 +31,7 @@ services:
       - db
     volumes:
       - ./app/static:/app/app/static
+      - ./htmlcov:/app/htmlcov
 
 volumes:
   pgdata:

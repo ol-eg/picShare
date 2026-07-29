@@ -41,7 +41,17 @@ make test
 This single command will:
 1. Build and start all containers (`docker compose up --build -d`)
 2. Create the test directories inside the app container
-3. Run pytest with all required env vars
+3. Run pytest with coverage (`--cov=app --cov-report=term --cov-report=html`)
+
+After `make test`, coverage output is printed to the terminal and an HTML
+report is written to `htmlcov/` (you can open `htmlcov/index.html` in a
+browser to see per-file line-by-line coverage).
+
+For CI or a quick check without the HTML report:
+
+```bash
+make test-ci
+```
 
 Tests auto-create/drop the schema per run via SQLAlchemy metadata. A dedicated
 `db-test` PostgreSQL container runs alongside the main one — its data is

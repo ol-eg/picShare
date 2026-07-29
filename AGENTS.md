@@ -43,7 +43,7 @@ picShare/
 - `localhost:8000/docs` — Swagger UI
 
 ## Testing (TDD workflow)
-- `make test` — build, start containers, create test dirs, run pytest
+- `make test` — build, start containers, create test dirs, run pytest with coverage
 - Stack: pytest + pytest-asyncio + httpx (ASGI transport, no real network)
 - Test DB (`db-test`) is ephemeral (tmpfs) — resets on restart
 - Tests auto-create/drop schema per run via SQLAlchemy metadata

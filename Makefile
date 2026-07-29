@@ -14,7 +14,11 @@ up-build:
 
 test: up
 	$(DC) exec app mkdir -p /tmp/picshare-test/uploads /tmp/picshare-test/thumbnails
-	$(EXEC) pytest -v
+	$(EXEC) pytest -v --cov=app --cov-report=term --cov-report=html
+
+test-ci: up
+	$(DC) exec app mkdir -p /tmp/picshare-test/uploads /tmp/picshare-test/thumbnails
+	$(EXEC) pytest -v --cov=app --cov-report=term
 
 migrate:
 	$(DC) exec app alembic upgrade head
