@@ -41,5 +41,10 @@ picShare/
 - `mkdocs serve -a 127.0.0.1:8001` — view docs
 - `localhost:8000/docs` — Swagger UI
 
+## Session history
+- 2026-07-28: Scaffold done, docker compose works, migrations run, Swagger at /docs.
+  MkDocs added (serve on 8001). Git init'd, SSH configured with ~/.ssh/id_rsa.
+  User needs to add SSH key to GitHub, create empty repo, and push.
+
 ## User is a novice
 Explain things. Suggest approaches. Ask before making changes.

@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, status
+from pathlib import Path
+
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, status, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,13 +12,37 @@ from app.image_utils import save_upload
 from app.models import User, Image
 from app.schemas import UserRegister, TokenResponse, UserOut, ImageOut, ImageUpdate
 
-app = FastAPI(title="picShare")
+app = FastAPI(title="picShare", redoc_url=None)
 
 
-# ── Static files (serving images) ──
+# ── Static files (serving images + local redoc bundle) ──
 
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
 app.mount("/thumbnails", StaticFiles(directory=settings.thumb_dir), name="thumbnails")
+app.mount("/static/redoc", StaticFiles(directory=Path(__file__).parent / "static" / "redoc_assets"), name="redoc_static")
+
+
+# ── Local ReDoc (avoid CDN dependency) ──
+
+REDOC_HTML = """<!DOCTYPE html>
+<html>
+<head>
+<title>picShare - ReDoc</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body {{ margin: 0; padding: 0; }}</style>
+</head>
+<body>
+<noscript>ReDoc requires Javascript to function. Please enable it to browse the documentation.</noscript>
+<redoc spec-url="/openapi.json"></redoc>
+<script src="/static/redoc/redoc.standalone.js"></script>
+</body>
+</html>"""
+
+
+@app.get("/redoc", include_in_schema=False)
+async def redoc():
+    return Response(content=REDOC_HTML, media_type="text/html")
 
 
 # ── Auth ──
