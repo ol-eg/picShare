@@ -52,9 +52,19 @@
     compose_file: "{{ app_dir }}/docker-compose.yml"
     env_file: "{{ app_dir }}/.env"
     app_port: 8000
-    db_password: "{{ vault_db_password | default('CHANGE_ME') }}"
-    invite_code: "{{ vault_invite_code | default('') }}"
-    secret_key: "{{ vault_secret_key | default('CHANGE_ME') }}"
+  vars_prompt:
+    - name: db_password
+      prompt: "Enter Postgres password"
+      private: yes
+      confirm: yes
+    - name: secret_key
+      prompt: "Enter app secret key (generate with: python3 -c \"import secrets; print(secrets.token_urlsafe(32))\")"
+      private: yes
+      confirm: yes
+    - name: invite_code
+      prompt: "Enter invite code (leave empty for open registration)"
+      private: no
+      default: ""
   become: yes
   tasks:
     - name: Copy docker-compose.yml

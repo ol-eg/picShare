@@ -13,11 +13,13 @@ ansible-galaxy collection install -r infra/requirements.yml
 ## Deploy
 
 ```bash
-ansible-playbook infra/playbook.yml \
-  --extra-vars "vault_db_password=<...> vault_secret_key=<...> vault_invite_code=<...>"
+ansible-playbook infra/playbook.yml
 ```
 
-If registration is open (no invite code), set `vault_invite_code=""`.
+You'll be prompted for:
+- **Postgres password** — any strong password
+- **Secret key** — paste the output of `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
+- **Invite code** — optional, press Enter for open registration
 
 ## Iterating
 
@@ -26,7 +28,9 @@ git pull
 ansible-playbook infra/playbook.yml
 ```
 
-The provisioning phase (Docker, firewall) is skipped on subsequent runs — it only acts if something is missing.
+Secrets are prompted again each time. The provisioning phase (Docker, firewall) is skipped on subsequent runs — it only acts if something is missing.
+
+To change a secret later, just enter the new value when prompted — Ansible will rewrite `.env` and recreate containers.
 
 ## Notes
 
