@@ -1,43 +1,34 @@
 # picShare deployment (Ansible)
 
-## Prerequisites (control machine — your dev box)
+Run on the Debian server after cloning the repo.
+
+## Prerequisites
 
 ```bash
 pip install ansible
 ansible-galaxy collection install -r infra/requirements.yml
 ```
 
-The server needs a fresh Debian install with SSH access.
-
-## First-time setup
-
-1. Edit `inventory.yml` — set your server IP and SSH user.
-
-2. Copy secrets, then run:
+## Deploy
 
 ```bash
-ansible-playbook playbook.yml \
+ansible-playbook infra/playbook.yml \
   --extra-vars "vault_db_password=<...> vault_secret_key=<...> vault_invite_code=<...>"
 ```
 
 If registration is open (no invite code), set `vault_invite_code=""`.
 
-3. Open `http://<server-ip>:8000` in a browser.
-
-## Iterating (after first deploy)
-
-After pulling new code on your dev machine, run again. Ansible is idempotent:
+## Iterating
 
 ```bash
-ansible-playbook playbook.yml
+git pull
+ansible-playbook infra/playbook.yml
 ```
 
-## Rolling back
+The provisioning phase (Docker, firewall) is skipped on subsequent runs — it only acts if something is missing.
 
-```bash
-ssh user@server
-cd /opt/picshare
-docker compose down
-docker compose up -d    # previous images are still cached
-# or rebuild with old tag
-```
+## Notes
+
+- The production compose file uses `restart: unless-stopped`, named volumes,
+  and a Postgres healthcheck so the app waits for the DB.
+- Default port is 8000. Change `app_port` via `--extra-vars "app_port=8080"`.

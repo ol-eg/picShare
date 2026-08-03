@@ -1,17 +1,10 @@
 ---
-- name: Deploy picShare
+- name: Provision server (Docker, firewall, directories)
   hosts: all
   vars:
-    app_user: picshare
     app_dir: /opt/picshare
-    compose_file: "{{ app_dir }}/docker-compose.yml"
-    env_file: "{{ app_dir }}/.env"
     app_port: 8000
-    db_password: "{{ vault_db_password | default('CHANGE_ME') }}"
-    invite_code: "{{ vault_invite_code | default('') }}"
-    secret_key: "{{ vault_secret_key | default('CHANGE_ME') }}"
   become: yes
-
   tasks:
     - name: Install system packages
       ansible.builtin.apt:
@@ -29,46 +22,16 @@
         state: started
         enabled: yes
 
-    - name: Create app user
-      ansible.builtin.user:
-        name: "{{ app_user }}"
-        system: yes
-        create_home: no
-
     - name: Create app directory
       ansible.builtin.file:
         path: "{{ app_dir }}"
         state: directory
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
         mode: "0755"
-
-    - name: Copy docker-compose.yml
-      ansible.builtin.copy:
-        src: docker-compose.yml
-        dest: "{{ compose_file }}"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
-        mode: "0644"
-
-    - name: Copy .env file
-      ansible.builtin.copy:
-        content: |
-          PICSHARE_DATABASE_URL=postgresql+asyncpg://picshare:{{ db_password }}@db:5432/picshare
-          PICSHARE_INVITE_CODE={{ invite_code }}
-          PICSHARE_SECRET_KEY={{ secret_key }}
-        dest: "{{ env_file }}"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
-        mode: "0600"
-      no_log: yes
 
     - name: Create uploads directory
       ansible.builtin.file:
         path: "{{ app_dir }}/app/static/uploads"
         state: directory
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
         mode: "0755"
 
     - name: Open firewall port
@@ -82,7 +45,36 @@
         state: enabled
         policy: deny
 
-    - name: Pull and start containers
+- name: Deploy picShare app
+  hosts: all
+  vars:
+    app_dir: /opt/picshare
+    compose_file: "{{ app_dir }}/docker-compose.yml"
+    env_file: "{{ app_dir }}/.env"
+    app_port: 8000
+    db_password: "{{ vault_db_password | default('CHANGE_ME') }}"
+    invite_code: "{{ vault_invite_code | default('') }}"
+    secret_key: "{{ vault_secret_key | default('CHANGE_ME') }}"
+  become: yes
+  tasks:
+    - name: Copy docker-compose.yml
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "{{ compose_file }}"
+        mode: "0644"
+
+    - name: Copy .env file
+      ansible.builtin.copy:
+        content: |
+          POSTGRES_PASSWORD={{ db_password }}
+          PICSHARE_DATABASE_URL=postgresql+asyncpg://picshare:{{ db_password }}@db:5432/picshare
+          PICSHARE_INVITE_CODE={{ invite_code }}
+          PICSHARE_SECRET_KEY={{ secret_key }}
+        dest: "{{ env_file }}"
+        mode: "0600"
+      no_log: yes
+
+    - name: Build and start containers
       community.docker.docker_compose_v2:
         project_src: "{{ app_dir }}"
         state: present
