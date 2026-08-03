@@ -5,7 +5,8 @@ Run on the Debian server after cloning the repo.
 ## Prerequisites
 
 ```bash
-pip install ansible
+sudo apt update
+sudo apt install -y python3-pip ansible
 ansible-galaxy collection install -r infra/requirements.yml
 ```
 
