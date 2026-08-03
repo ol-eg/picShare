@@ -1,0 +1,5 @@
+all:
+  hosts:
+    picshare-server:
+      ansible_host: 192.168.1.XXX   # <-- replace with your server's IP
+      ansible_user: root             # or a sudo-capable user

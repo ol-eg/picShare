@@ -1,0 +1,35 @@
+services:
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: picshare
+      POSTGRES_PASSWORD: ${PICSHARE_DB_PASSWORD}
+      POSTGRES_DB: picshare
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U picshare"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build: .
+    ports:
+      - "{{ app_port }}:8000"
+    environment:
+      PICSHARE_DATABASE_URL: ${PICSHARE_DATABASE_URL}
+      PICSHARE_INVITE_CODE: ${PICSHARE_INVITE_CODE}
+      PICSHARE_SECRET_KEY: ${PICSHARE_SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/app/static/uploads
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:
