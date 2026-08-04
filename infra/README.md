@@ -16,7 +16,7 @@ ansible-galaxy collection install -r infra/requirements.yml
 ansible-playbook infra/playbook.yml
 ```
 
-Run from the repository root. The `infra/ansible.cfg` is picked up automatically because Ansible searches parent directories. No inventory file needed — the playbook targets `localhost` directly.
+Run from the repository root. The `infra/ansible.cfg` is picked up automatically because Ansible searches parent directories.
 
 ## Result
 
