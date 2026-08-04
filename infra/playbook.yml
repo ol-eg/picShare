@@ -125,7 +125,8 @@
         project_src: "{{ app_dir }}"
         state: present
         build: always
-        env_file: "{{ env_file }}"
+        env_files:
+          - "{{ app_dir }}/.env"
 
     - name: Wait for app to be healthy
       ansible.builtin.uri:
