@@ -18,7 +18,7 @@ ansible-playbook infra/playbook.yml
 
 You'll be prompted for:
 - **Postgres password** — any strong password
-- **Secret key** — paste the output of `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
+- **Secret key** — used to sign login tokens (JWT). Paste the output of `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`. Without this, anyone can forge auth tokens.
 - **Invite code** — optional, press Enter for open registration
 
 ## Iterating
