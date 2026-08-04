@@ -1,6 +1,7 @@
 ---
 - name: Provision server (Docker, firewall, directories)
-  hosts: all
+  hosts: localhost
+  connection: local
   vars:
     app_dir: /opt/picshare
     app_port: 8000
@@ -46,7 +47,8 @@
         policy: deny
 
 - name: Deploy picShare app
-  hosts: all
+  hosts: localhost
+  connection: local
   vars:
     app_dir: /opt/picshare
     compose_file: "{{ app_dir }}/docker-compose.yml"

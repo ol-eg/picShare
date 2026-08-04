@@ -1,5 +1,0 @@
-all:
-  hosts:
-    picshare-server:
-      ansible_connection: local
-      ansible_become: yes

@@ -16,10 +16,7 @@ ansible-galaxy collection install -r infra/requirements.yml
 ansible-playbook infra/playbook.yml
 ```
 
-You'll be prompted for:
-- **Postgres password** — any strong password
-- **Secret key** — used to sign login tokens (JWT). Paste the output of `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`. Without this, anyone can forge auth tokens.
-- **Invite code** — optional, press Enter for open registration
+Run from the repository root. The `infra/ansible.cfg` is picked up automatically because Ansible searches parent directories. No inventory file needed — the playbook targets `localhost` directly.
 
 ## Result
 
