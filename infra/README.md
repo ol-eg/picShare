@@ -21,6 +21,34 @@ You'll be prompted for:
 - **Secret key** — used to sign login tokens (JWT). Paste the output of `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`. Without this, anyone can forge auth tokens.
 - **Invite code** — optional, press Enter for open registration
 
+## Result
+
+After the playbook finishes you'll have two Docker containers running on the server:
+
+| Container | Purpose |
+|-----------|---------|
+| `picshare-db-1`  | PostgreSQL 17 |
+| `picshare-app-1` | FastAPI app on port **8000** |
+
+The app is reachable at **http://localhost:8000** on the server itself.
+
+## Making it accessible from the internet
+
+Your Debian server is on your home LAN (e.g. 192.168.0.X). To reach it from outside:
+
+1. Log into your **router's admin panel** (usually http://192.168.0.1)
+2. Find **Port Forwarding** (sometimes called "Virtual Server" or "NAT")
+3. Add a rule:
+   - **External port**: `8000`
+   - **Internal IP**: your server's LAN address (e.g. `192.168.0.50`)
+   - **Internal port**: `8000`
+   - **Protocol**: TCP
+4. Save and apply
+
+Now you can access the app at **http://&lt;your-public-ip&gt;:8000** from anywhere.
+
+To find your public IP: `curl ifconfig.me` on the server.
+
 ## Iterating
 
 ```bash
