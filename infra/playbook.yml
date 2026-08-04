@@ -7,13 +7,34 @@
     app_port: 8000
   become: yes
   tasks:
-    - name: Install system packages
+    - name: Install prerequisites
       ansible.builtin.apt:
         name:
-          - docker.io
-          - docker-compose-v2
+          - ca-certificates
+          - curl
           - python3-pip
           - ufw
+        state: present
+        update_cache: yes
+
+    - name: Add Docker apt key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
         state: present
         update_cache: yes
 
@@ -90,7 +111,7 @@
       community.docker.docker_compose_v2:
         project_src: "{{ app_dir }}"
         state: present
-        pull: always
+        build: always
         env_file: "{{ env_file }}"
 
     - name: Wait for app to be healthy
