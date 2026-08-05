@@ -101,6 +101,7 @@
         db_password: "{{ (env_content.content | b64decode | regex_search('POSTGRES_PASSWORD=(.*)', '\\1') | first) | default('') }}"
         secret_key: "{{ (env_content.content | b64decode | regex_search('PICSHARE_SECRET_KEY=(.*)', '\\1') | first) | default('') }}"
         invite_code: "{{ (env_content.content | b64decode | regex_search('PICSHARE_INVITE_CODE=(.*)', '\\1') | first) | default('') }}"
+        duckdns_token: "{{ (env_content.content | b64decode | regex_search('DUCKDNS_TOKEN=(.*)', '\\1') | first) | default('') }}"
       when: env_stat.stat.exists
       no_log: yes
 
@@ -124,11 +125,19 @@
       register: prompt_invite
       when: not env_stat.stat.exists
 
+    - name: Prompt for DuckDNS token (first deploy only)
+      ansible.builtin.pause:
+        prompt: "Enter DuckDNS token (get from duckdns.org, empty to skip)"
+      register: prompt_duckdns
+      when: not env_stat.stat.exists
+      no_log: yes
+
     - name: Set secrets from prompts (first deploy only)
       ansible.builtin.set_fact:
         db_password: "{{ prompt_db.user_input }}"
         secret_key: "{{ prompt_key.user_input }}"
         invite_code: "{{ prompt_invite.user_input | default('') }}"
+        duckdns_token: "{{ prompt_duckdns.user_input | default('') }}"
       when: not env_stat.stat.exists
       no_log: yes
 
@@ -167,6 +176,8 @@
           PICSHARE_DATABASE_URL=postgresql+asyncpg://picshare:{{ db_password }}@db:5432/picshare
           PICSHARE_INVITE_CODE={{ invite_code }}
           PICSHARE_SECRET_KEY={{ secret_key }}
+          DUCKDNS_DOMAIN=mypish
+          DUCKDNS_TOKEN={{ duckdns_token }}
         dest: "{{ env_file }}"
         mode: "0600"
       no_log: yes
@@ -187,3 +198,19 @@
       until: result.status == 200
       retries: 15
       delay: 2
+
+    - name: Install DuckDNS updater script
+      ansible.builtin.copy:
+        dest: /opt/picshare/duckdns.sh
+        content: |
+          #!/bin/sh
+          . /opt/picshare/.env
+          echo url="https://www.duckdns.org/update?domains=$DUCKDNS_DOMAIN&token=$DUCKDNS_TOKEN&ip=" | curl -k -o /opt/picshare/duckdns.log -s -K -
+        mode: "0755"
+
+    - name: Install DuckDNS cron job (every 5 minutes)
+      ansible.builtin.cron:
+        name: duckdns-update
+        minute: "*/5"
+        job: "/opt/picshare/duckdns.sh"
+        state: present

@@ -46,6 +46,15 @@ Now you can access the app at **http://&lt;your-public-ip&gt;:8000** from anywhe
 
 To find your public IP: `curl ifconfig.me` on the server.
 
+### DuckDNS (free hostname)
+
+The playbook will prompt for a DuckDNS token on first deploy. If you provide
+one, it installs a cron job that updates your DNS record every 5 minutes.
+Your app is then reachable at **http://mypish.duckdns.org:8000** regardless
+of IP changes.
+
+Get a free token at https://duckdns.org.
+
 ## Iterating
 
 ```bash
