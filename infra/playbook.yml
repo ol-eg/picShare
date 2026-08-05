@@ -63,11 +63,14 @@
         state: directory
         mode: "0755"
 
-    - name: Create uploads directory
+    - name: Create app static directories
       ansible.builtin.file:
-        path: "{{ app_dir }}/app/static/uploads"
+        path: "{{ item }}"
         state: directory
         mode: "0755"
+      loop:
+        - "{{ app_dir }}/app/static/uploads"
+        - "{{ app_dir }}/app/static/thumbnails"
 
     - name: Open firewall port
       ansible.builtin.ufw:
