@@ -63,15 +63,6 @@
         state: directory
         mode: "0755"
 
-    - name: Create app static directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        mode: "0755"
-      loop:
-        - "{{ app_dir }}/app/static/uploads"
-        - "{{ app_dir }}/app/static/thumbnails"
-
     - name: Open firewall port
       ansible.builtin.ufw:
         rule: allow
@@ -159,6 +150,15 @@
         src: docker-compose.yml.j2
         dest: "{{ compose_file }}"
         mode: "0644"
+
+    - name: Ensure app static directories exist (git doesn't track empty dirs)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ app_dir }}/app/static/uploads"
+        - "{{ app_dir }}/app/static/thumbnails"
 
     - name: Copy .env file
       ansible.builtin.copy:
