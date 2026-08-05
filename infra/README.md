@@ -25,9 +25,9 @@ After the playbook finishes you'll have two Docker containers running on the ser
 | Container | Purpose |
 |-----------|---------|
 | `picshare-db-1`  | PostgreSQL 17 |
-| `picshare-app-1` | FastAPI app on port **8000** |
+| `picshare-app-1` | FastAPI app on port **80** |
 
-The app is reachable at **http://localhost:8000** on the server itself.
+The app is reachable at **http://localhost** on the server itself.
 
 ## Making it accessible from the internet
 
@@ -36,9 +36,9 @@ Your Debian server is on your home LAN (e.g. 192.168.0.X). To reach it from outs
 1. Log into your **router's admin panel** (usually http://192.168.0.1)
 2. Find **Port Forwarding** (sometimes called "Virtual Server" or "NAT")
 3. Add a rule:
-   - **External port**: `8000`
+   - **External port**: `80`
    - **Internal IP**: your server's LAN address (e.g. `192.168.0.50`)
-   - **Internal port**: `8000`
+   - **Internal port**: `80`
    - **Protocol**: TCP
 4. Save and apply
 
@@ -50,8 +50,7 @@ To find your public IP: `curl ifconfig.me` on the server.
 
 The playbook will prompt for a DuckDNS token on first deploy. If you provide
 one, it installs a cron job that updates your DNS record every 5 minutes.
-Your app is then reachable at **http://mypish.duckdns.org:8000** regardless
-of IP changes.
+Your app is then reachable at **http://mypish.duckdns.org** (no port needed).
 
 Get a free token at https://duckdns.org.
 
