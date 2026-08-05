@@ -57,18 +57,23 @@ The playbook rsyncs the source, rebuilds the image, and recreates the app
 container automatically. No manual cleanup needed — the DB container stays
 healthy and keeps all data.
 
-If you need to force a full reset (e.g. DB schema changed):
+Secrets are only prompted on **first deploy**. On subsequent runs the playbook
+reads existing values from `/opt/picshare/.env` and skips all prompts.
+
+To change a secret later, delete the `.env` file first:
 
 ```bash
-sudo docker compose -f /opt/picshare/docker-compose.yml down --volumes
+sudo rm /opt/picshare/.env
 ansible-playbook infra/playbook.yml
 ```
 
-Secrets are prompted again each time. The provisioning phase (Docker, firewall)
-is skipped on subsequent runs — it only acts if something is missing.
+If you need a full reset (e.g. DB schema changed):
 
-To change a secret later, just enter the new value when prompted — Ansible will
-rewrite `.env` and recreate containers.
+```bash
+sudo docker compose -f /opt/picshare/docker-compose.yml down --volumes
+sudo rm /opt/picshare/.env
+ansible-playbook infra/playbook.yml
+```
 
 ## Notes
 

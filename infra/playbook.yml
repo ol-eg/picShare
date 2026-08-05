@@ -91,21 +91,56 @@
     env_file: "{{ app_dir }}/.env"
     app_port: 8000
     repo_root: "{{ playbook_dir }}/.."
-  vars_prompt:
-    - name: db_password
-      prompt: "Enter Postgres password"
-      private: yes
-      confirm: yes
-    - name: secret_key
-      prompt: "Enter app secret key (generate with: python3 -c \"import secrets; print(secrets.token_urlsafe(32))\")"
-      private: yes
-      confirm: yes
-    - name: invite_code
-      prompt: "Enter invite code (leave empty for open registration)"
-      private: no
-      default: ""
   become: yes
   tasks:
+    - name: Check if .env already exists
+      ansible.builtin.stat:
+        path: "{{ env_file }}"
+      register: env_stat
+
+    - name: Read existing secrets from .env
+      ansible.builtin.slurp:
+        src: "{{ env_file }}"
+      register: env_content
+      when: env_stat.stat.exists
+      no_log: yes
+
+    - name: Set defaults from existing .env
+      ansible.builtin.set_fact:
+        db_password: "{{ (env_content.content | b64decode | regex_search('POSTGRES_PASSWORD=(.*)', '\\1') | first) | default('') }}"
+        secret_key: "{{ (env_content.content | b64decode | regex_search('PICSHARE_SECRET_KEY=(.*)', '\\1') | first) | default('') }}"
+        invite_code: "{{ (env_content.content | b64decode | regex_search('PICSHARE_INVITE_CODE=(.*)', '\\1') | first) | default('') }}"
+      when: env_stat.stat.exists
+      no_log: yes
+
+    - name: Prompt for Postgres password (first deploy only)
+      ansible.builtin.pause:
+        prompt: "Enter Postgres password"
+      register: prompt_db
+      when: not env_stat.stat.exists
+      no_log: yes
+
+    - name: Prompt for secret key (first deploy only)
+      ansible.builtin.pause:
+        prompt: "Enter app secret key (generate with: python3 -c \"import secrets; print(secrets.token_urlsafe(32))\")"
+      register: prompt_key
+      when: not env_stat.stat.exists
+      no_log: yes
+
+    - name: Prompt for invite code (first deploy only)
+      ansible.builtin.pause:
+        prompt: "Enter invite code (leave empty for open registration)"
+      register: prompt_invite
+      when: not env_stat.stat.exists
+
+    - name: Set secrets from prompts (first deploy only)
+      ansible.builtin.set_fact:
+        db_password: "{{ prompt_db.user_input }}"
+        secret_key: "{{ prompt_key.user_input }}"
+        invite_code: "{{ prompt_invite.user_input | default('') }}"
+      when: not env_stat.stat.exists
+      no_log: yes
+
     - name: Sync repo to app directory (exclude git, venvs, caches)
       ansible.builtin.synchronize:
         src: "{{ repo_root }}/"
