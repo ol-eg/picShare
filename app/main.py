@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import hash_password, verify_password, create_token, get_current_user
 from app.database import settings, get_db
-from app.dependencies import get_db, get_current_user
 from app.image_utils import save_upload
 from app.models import User, Image
 from app.schemas import UserRegister, TokenResponse, UserOut, ImageOut, ImageUpdate

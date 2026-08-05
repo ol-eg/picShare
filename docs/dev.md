@@ -22,9 +22,26 @@ Open [http://127.0.0.1:8001](http://127.0.0.1:8001).
 ## Adding a new DB table
 
 1. Define the model in `app/models.py` (inherit `Base`)
-2. Run `alembic revision --autogenerate -m "add new_table"`
+2. Run `make migrate-auto m="add new_table"` — this autogenerates and applies the migration
 3. Review the migration file in `alembic/versions/`
-4. Run `alembic upgrade head`
+
+## Generating architecture diagrams
+
+Architecture diagrams in `docs/` are generated from scripts in [`docs/diagram_scripts/`](diagram_scripts/) using the [Diagrams](https://diagrams.mingrammer.com/) library.
+
+```bash
+pip install --user diagrams
+python3 docs/diagram.py              # regenerate all
+python3 docs/diagram_scripts/stack.py  # regenerate one
+```
+
+Three PNGs are produced:
+
+| File | Where used |
+|------|-----------|
+| `architecture_diagram.png` | [Architecture](architecture.md) — deployment view |
+| `module_diagram.png` | [Architecture](architecture.md) — internal module coupling |
+| `stack_diagram.png` | [Home](index.md) — technology stack layers |
 
 ## Testing
 

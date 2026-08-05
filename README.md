@@ -4,6 +4,15 @@ Multi-user photo sharing web app built with **FastAPI** + **PostgreSQL**.
 
 > Full documentation is available at [docs/](docs/) (rendered with MkDocs).
 
+### Serve docs locally
+
+```bash
+pip install --user mkdocs
+mkdocs serve -a 127.0.0.1:8001
+```
+
+Open [http://127.0.0.1:8001](http://127.0.0.1:8001)
+
 ## Quick start
 
 ```bash

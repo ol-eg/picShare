@@ -27,13 +27,17 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## Stack
 
-| Layer       | Technology                     |
-|-------------|--------------------------------|
-| Framework   | FastAPI                        |
-| Server      | Uvicorn (ASGI)                 |
-| Database    | PostgreSQL 17                  |
-| ORM         | SQLAlchemy (async)             |
-| Migrations  | Alembic                        |
-| Auth        | bcrypt + JWT                   |
-| Images      | Pillow (thumbnails)            |
-| Container   | Docker Compose                 |
+![picShare Technology Stack](stack_diagram.png)
+
+| Layer          | Technology                     |
+|----------------|--------------------------------|
+| Framework      | FastAPI                        |
+| Server         | Uvicorn (ASGI)                 |
+| Frontend       | Jinja2 + Tailwind CSS + HTMX  |
+| API Docs       | Swagger UI / ReDoc             |
+| Database       | PostgreSQL 17                  |
+| ORM            | SQLAlchemy (async)             |
+| Migrations     | Alembic                        |
+| Auth           | bcrypt + JWT                   |
+| Images         | Pillow (thumbnails)            |
+| Container      | Docker Compose                 |

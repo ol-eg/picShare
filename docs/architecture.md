@@ -1,34 +1,25 @@
 # Architecture
 
-```
-┌──────────────┐     ┌──────────────────┐     ┌──────────────┐
-│   Browser    │────>│  FastAPI / Uvicorn│────>│  PostgreSQL  │
-│  (Swagger)   │     │                  │     │              │
-│  (Frontend)  │     │  app/main.py     │     │  users       │
-└──────────────┘     │  app/models.py   │     │  images      │
-                     │  app/auth.py     │     └──────────────┘
-                     │  app/schemas.py  │
-                     │  app/image_utils │
-                     └────────┬─────────┘
-                              │
-                     ┌────────▼─────────┐
-                     │  Static files     │
-                     │                   │
-                     │  uploads/         │
-                     │  thumbnails/      │
-                     └──────────────────┘
-```
+![picShare Architecture](architecture_diagram.png)
+
+> Diagram generated from [`docs/diagram.py`](diagram.py) using the
+> [Diagrams](https://diagrams.mingrammer.com/) library.
+> Re-generate with: `python3 docs/diagram.py`
 
 ## App structure
 
-| Module | Role |
-|--------|------|
+![App Module Coupling](module_diagram.png)
+
+| Module / Directory | Role |
+|--------------------|------|
 | `main.py` | Route definitions, app entry point |
 | `models.py` | SQLAlchemy ORM models (`User`, `Image`) |
 | `schemas.py` | Pydantic request/response validation |
 | `auth.py` | Password hashing, JWT creation/verification |
 | `database.py` | DB engine, session factory, settings |
 | `image_utils.py` | File save, thumbnail generation |
+| `templates/` | Jinja2 HTML templates (`base.html`, `home.html`) |
+| `static/redoc_assets/` | Local ReDoc standalone bundle (no CDN) |
 
 ## Request flow
 
