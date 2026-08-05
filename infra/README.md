@@ -53,9 +53,22 @@ git pull
 ansible-playbook infra/playbook.yml
 ```
 
-Secrets are prompted again each time. The provisioning phase (Docker, firewall) is skipped on subsequent runs — it only acts if something is missing.
+The playbook rsyncs the source, rebuilds the image, and recreates the app
+container automatically. No manual cleanup needed — the DB container stays
+healthy and keeps all data.
 
-To change a secret later, just enter the new value when prompted — Ansible will rewrite `.env` and recreate containers.
+If you need to force a full reset (e.g. DB schema changed):
+
+```bash
+sudo docker compose -f /opt/picshare/docker-compose.yml down --volumes
+ansible-playbook infra/playbook.yml
+```
+
+Secrets are prompted again each time. The provisioning phase (Docker, firewall)
+is skipped on subsequent runs — it only acts if something is missing.
+
+To change a secret later, just enter the new value when prompted — Ansible will
+rewrite `.env` and recreate containers.
 
 ## Notes
 
