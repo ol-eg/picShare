@@ -1,6 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="text-center py-16">
-  <h1 class="text-4xl font-bold text-gray-900">Register</h1>
+<section class="max-w-md mx-auto py-16">
+  <h1 class="text-4xl font-bold text-gray-900 text-center mb-8">Register</h1>
+  <form method="post" action="/register" class="space-y-4 bg-white p-8 rounded-lg shadow">
+    <div>
+      <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+      <input type="text" id="username" name="username" required
+             class="mt-1 w-full rounded-md border border-gray-300 p-2">
+    </div>
+    <div>
+      <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+      <input type="password" id="password" name="password" required
+             class="mt-1 w-full rounded-md border border-gray-300 p-2">
+    </div>
+    <div>
+      <label for="invite_code" class="block text-sm font-medium text-gray-700">Invite code</label>
+      <input type="text" id="invite_code" name="invite_code"
+             class="mt-1 w-full rounded-md border border-gray-300 p-2">
+    </div>
+    <button type="submit"
+            class="w-full rounded-md bg-blue-600 py-2 font-medium text-white hover:bg-blue-700">
+      Register
+    </button>
+  </form>
 </section>
 {% endblock %}
