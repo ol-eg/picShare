@@ -8,3 +8,11 @@ filterwarnings = [
     "ignore:.*'crypt' is deprecated:DeprecationWarning",
     "ignore:`TemplateResponse` is deprecated:DeprecationWarning",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["app"]
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true

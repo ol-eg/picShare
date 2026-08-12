@@ -12,7 +12,8 @@ async def test_register_requires_invite_code(client):
 @pytest.mark.asyncio
 async def test_register_success(client):
     resp = await client.post(
-        "/register", json={"username": "alice", "password": "password123", "invite_code": INVITE_CODE}
+        "/register",
+        json={"username": "alice", "password": "password123", "invite_code": INVITE_CODE},
     )
     assert resp.status_code == 201
     data = resp.json()
@@ -23,7 +24,8 @@ async def test_register_success(client):
 @pytest.mark.asyncio
 async def test_register_invalid_invite_code(client):
     resp = await client.post(
-        "/register", json={"username": "bob", "password": "password123", "invite_code": "wrong-code"}
+        "/register",
+        json={"username": "bob", "password": "password123", "invite_code": "wrong-code"},
     )
     assert resp.status_code == 403
 

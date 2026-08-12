@@ -1,14 +1,15 @@
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, constr
-
+from pydantic import BaseModel, Field
 
 # ── Auth ──
 
+
 class UserRegister(BaseModel):
-    username: constr(min_length=3, max_length=64)
-    password: constr(min_length=6, max_length=128)
+    username: Annotated[str, Field(min_length=3, max_length=64)]
+    password: Annotated[str, Field(min_length=6, max_length=128)]
     invite_code: str | None = None
 
 
@@ -19,6 +20,7 @@ class TokenResponse(BaseModel):
 
 # ── Users ──
 
+
 class UserOut(BaseModel):
     id: uuid.UUID
     username: str
@@ -28,6 +30,7 @@ class UserOut(BaseModel):
 
 
 # ── Images ──
+
 
 class ImageOut(BaseModel):
     id: uuid.UUID

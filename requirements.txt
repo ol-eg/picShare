@@ -19,3 +19,11 @@ pytest-cov==6.0.0
 httpx==0.28.1
 asgi-lifespan==2.1.0
 beautifulsoup4==4.13.4
+
+# Dev tools
+ruff==0.8.4
+mypy==1.14.1
+
+# Type stubs (for mypy)
+types-python-jose==3.5.0.20260408
+types-passlib==1.7.7.20260211

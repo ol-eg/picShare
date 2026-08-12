@@ -100,7 +100,10 @@ async def test_delete_other_users_image(client, auth_headers):
     )
     image_id = upload.json()["id"]
 
-    resp = await client.post("/register", json={"username": "other", "password": "secret123", "invite_code": "test-invite-42"})
+    resp = await client.post(
+        "/register",
+        json={"username": "other", "password": "secret123", "invite_code": "test-invite-42"},
+    )
     other_token = resp.json()["access_token"]
     other_headers = {"Authorization": f"Bearer {other_token}"}
 

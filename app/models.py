@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Text, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -18,7 +18,9 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    images: Mapped[list["Image"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
+    images: Mapped[list["Image"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
 
 
 class Image(Base):

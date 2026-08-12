@@ -27,9 +27,16 @@ All containers/commands run via Docker Compose:
 - `make migrate-auto m="msg"` — autogenerate + apply a migration
 - `make test` — run full pytest suite with coverage (HTML + term)
 - `make test-ci` — same but terminal coverage only
+- `make lint` — run Ruff lint + format check on `app/` and `tests/`
+- `make lint-fix` — auto-fix lint issues + format `app/` and `tests/`
+- `make typecheck` — run mypy on `app/` (prod code only)
 
 Tests run inside the `app` container against a dedicated test DB
 (`db-test`) and set test-specific env vars (upload/thumb dirs, secret key).
+
+Lint and type-checking also run inside the `app` container. Source files
+(`app/`) and tests (`tests/`) are bind-mounted so the container always checks
+the live code on disk.
 
 ### Workflow — TDD
 We practice TDD here, always:
@@ -43,6 +50,7 @@ Serve docs locally: `mkdocs serve -a 127.0.0.1:8001`
 ## Pre-commit checklist
 
 1. Run `make test` — all tests must pass
-2. Regenerate diagrams: `python3 docs/diagram.py`
-3. Quick scan: `git diff --stat` for unintended files
-4. If docs changed, start `mkdocs serve -a 127.0.0.1:8001` and verify the rendered pages look correct
+2. Run `make lint` and `make typecheck` — lint and type check must pass
+3. Regenerate diagrams: `python3 docs/diagram.py`
+4. Quick scan: `git diff --stat` for unintended files
+5. If docs changed, start `mkdocs serve -a 127.0.0.1:8001` and verify the rendered pages look correct

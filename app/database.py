@@ -1,5 +1,5 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from pydantic_settings import BaseSettings
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 
 class Settings(BaseSettings):

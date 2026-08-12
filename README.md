@@ -35,6 +35,8 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs)
 | Images      | Pillow (thumbnails)            |
 | Container   | Docker Compose                 |
 | Testing     | pytest / pytest-asyncio / httpx|
+| Lint        | Ruff (app/ and tests/)         |
+| Types       | mypy (app/)                    |
 
 ## Make targets
 
@@ -44,6 +46,9 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs)
 - `make migrate-auto m="message"` — autogenerate + apply a migration
 - `make test` — build, start, create test dirs, run all tests with coverage
 - `make test-ci` — same but terminal report only (no HTML)
+- `make lint` — run Ruff lint + format check on `app/` and `tests/`
+- `make lint-fix` — auto-fix lint issues + format `app/` and `tests/`
+- `make typecheck` — run mypy type check on `app/` (prod code only)
 
 See [docs/dev.md](docs/dev.md) for the development guide.
 

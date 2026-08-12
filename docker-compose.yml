@@ -31,7 +31,8 @@ services:
     depends_on:
       - db
     volumes:
-      - ./app/static:/app/app/static
+      - ./app:/app/app
+      - ./tests:/app/tests
       - ./htmlcov:/app/htmlcov
 
 volumes:

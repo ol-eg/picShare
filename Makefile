@@ -1,4 +1,4 @@
-.PHONY: up test testd up-build migrate migrate-auto
+.PHONY: up test testd down-build migrate migrate-auto lint lint-fix typecheck
 
 DC = docker compose
 EXEC = $(DC) exec -e PICSHARE_TEST_DB_HOST=db-test \
@@ -27,3 +27,14 @@ migrate:
 migrate-auto:
 	$(DC) exec app alembic revision --autogenerate -m "$(m)"
 	$(DC) exec app alembic upgrade head
+
+lint: up
+	$(DC) exec app ruff check app tests
+	$(DC) exec app ruff format --check app tests
+
+lint-fix: up
+	$(DC) exec app ruff check --fix app tests
+	$(DC) exec app ruff format app tests
+
+typecheck: up
+	$(DC) exec app mypy app

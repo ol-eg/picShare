@@ -41,3 +41,5 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs)
 | Auth           | bcrypt + JWT                   |
 | Images         | Pillow (thumbnails)            |
 | Container      | Docker Compose                 |
+| Lint           | Ruff                           |
+| Types          | mypy + typeshed stubs          |

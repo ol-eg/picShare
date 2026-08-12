@@ -91,4 +91,19 @@ ephemeral (tmpfs) and resets on restart.
 - Pydantic schemas for all I/O validation
 - Async endpoints (`async def`) for DB queries
 - Dependencies via FastAPI's `Depends()` mechanism
-- `ruff` for linting (no config added yet)
+
+## Linting and type checking
+
+Lint and type-checking run inside the `app` container (source is bind-mounted
+so they check the live code on disk).
+
+```bash
+make lint        # Ruff lint + format check on app/ and tests/
+make lint-fix    # auto-fix lint issues + format
+make typecheck   # mypy type check on app/ (prod code only)
+```
+
+Config lives in `ruff.toml` (Ruff rules + line length) and `pyproject.toml`
+(`[tool.mypy]`). Type stubs for third-party libraries (`types-python-jose`,
+`types-passlib`) are pinned in `requirements.txt` so mypy keeps them fully
+typed instead of silencing missing imports.
