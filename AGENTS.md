@@ -1,5 +1,7 @@
 # picShare
 
+User is a novice — explain things, suggest approaches, ask before making changes.
+
 Multi-user photo sharing web app: FastAPI + SQLAlchemy (async) + PostgreSQL, containerized with Docker Compose. Auth is JWT-based (bcrypt) and registration is gated by an invite code.
 
 ## Layout
