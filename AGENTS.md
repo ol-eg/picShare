@@ -1,61 +1,46 @@
-# picShare project memory
+# picShare
 
-## What we're building
-Multi-user photo sharing web app. FastAPI + PostgreSQL + Docker Compose.
+Multi-user photo sharing web app: FastAPI + SQLAlchemy (async) + PostgreSQL, containerized with Docker Compose. Auth is JWT-based (bcrypt) and registration is gated by an invite code.
 
-## Current state
-Scaffolding complete. App runs (docker compose up --build), migrations run
-(alembic upgrade head), Swagger at localhost:8000/docs. MkDocs docs at
-localhost:8001.
+## Layout
 
-## Stack
-- FastAPI / Uvicorn (ASGI)
-- PostgreSQL 17 (Docker)
-- SQLAlchemy async + asyncpg
-- Alembic for migrations
-- bcrypt + JWT for auth
-- Registration gated by `PICSHARE_INVITE_CODE` env var (absent = open)
-- Pillow for thumbnails
-- MkDocs for project docs
+- `app/` — FastAPI application
+  - `main.py` — app entrypoint and routing
+  - `database.py` — async SQLAlchemy engine/session
+  - `models.py` / `schemas.py` — ORM models and Pydantic schemas
+  - `image_utils.py` — Pillow thumbnail generation
+  - `auth.py` — bcrypt + JWT auth
+  - `static/` / `templates/` — Jinja2 frontend
+- `alembic/` — DB migrations
+- `tests/` — pytest suite (async, uses `testpaths = ["tests"]`)
+- `docs/` — MkDocs site; `docs/diagram.py` regenerates architecture diagrams
 
-## Project structure
-```
-picShare/
-├── app/
-│   ├── main.py          # Routes
-│   ├── models.py        # User, Image ORM models
-│   ├── schemas.py       # Pydantic schemas
-│   ├── database.py      # DB engine + Settings
-│   ├── auth.py          # Hashing + JWT + get_current_user
-│   ├── image_utils.py   # Save/thumbnail uploads
-│   └── static/uploads/  # On-disk images
-├── docs/                # MkDocs markdown pages
-├── alembic/             # Migrations
-├── docker-compose.yml
-├── Dockerfile
-└── mkdocs.yml
-```
+## Commands
 
-## Running
-- `make up` — start app + DB (background)
-- `make migrate` — run migrations
-- `make test` — build + test
-- `mkdocs serve -a 127.0.0.1:8001` — view docs
-- `localhost:8000/docs` — Swagger UI
+All containers/commands run via Docker Compose:
 
-## Testing (TDD workflow)
-- `make test` — build, start containers, create test dirs, run pytest with coverage
-- Stack: pytest + pytest-asyncio + httpx (ASGI transport, no real network)
-- Test DB (`db-test`) is ephemeral (tmpfs) — resets on restart
-- Tests auto-create/drop schema per run via SQLAlchemy metadata
-- Test DB (`db-test`) is ephemeral (tmpfs) — resets on restart
-- Tests auto-create/drop schema per run via SQLAlchemy metadata
-- Stack: pytest + pytest-asyncio + httpx (ASGI transport, no real network)
+- `make up` — build + start in background
+- `make up-build` — build + start with live logs
+- `make migrate` — apply Alembic migrations
+- `make migrate-auto m="msg"` — autogenerate + apply a migration
+- `make test` — run full pytest suite with coverage (HTML + term)
+- `make test-ci` — same but terminal coverage only
 
-## Session history
-- 2026-07-28: Scaffold done, docker compose works, migrations run, Swagger at /docs.
-  MkDocs added (serve on 8001). Git init'd, SSH configured with ~/.ssh/id_rsa.
-  User needs to add SSH key to GitHub, create empty repo, and push.
+Tests run inside the `app` container against a dedicated test DB
+(`db-test`) and set test-specific env vars (upload/thumb dirs, secret key).
 
-## User is a novice
-Explain things. Suggest approaches. Ask before making changes.
+### Workflow — TDD
+We practice TDD here, always:
+1. Write a small failing test first
+2. Run it and confirm it fails (red)
+3. Write the minimum code to make it pass (green)
+4. Rinse and repeat — small, iterative steps
+
+Serve docs locally: `mkdocs serve -a 127.0.0.1:8001`
+
+## Pre-commit checklist
+
+1. Run `make test` — all tests must pass
+2. Regenerate diagrams: `python3 docs/diagram.py`
+3. Quick scan: `git diff --stat` for unintended files
+4. If docs changed, start `mkdocs serve -a 127.0.0.1:8001` and verify the rendered pages look correct
