@@ -29,3 +29,17 @@ async def test_homepage_has_register_link(client):
     register = soup.find("a", string="Register")
     assert register is not None, "Expected a 'Register' link on the homepage"
     assert register.get("href") is not None
+
+
+@pytest.mark.asyncio
+async def test_register_link_loads_page(client):
+    resp = await client.get("/register")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers["content-type"]
+
+
+@pytest.mark.asyncio
+async def test_login_link_loads_page(client):
+    resp = await client.get("/login")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers["content-type"]

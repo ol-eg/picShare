@@ -25,6 +25,16 @@ async def homepage(request: Request):
     return templates.TemplateResponse(request, "home.html")
 
 
+@app.get("/register", include_in_schema=False)
+async def register_page(request: Request):
+    return templates.TemplateResponse(request, "register.html")
+
+
+@app.get("/login", include_in_schema=False)
+async def login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html")
+
+
 # ── Static files (serving images + local redoc bundle) ──
 
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
