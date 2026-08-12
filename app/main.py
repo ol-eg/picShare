@@ -11,6 +11,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
@@ -96,6 +97,29 @@ async def register(body: UserRegister, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.commit()
     return TokenResponse(access_token=create_token(str(user.id)))
+
+
+@app.post("/register/form", include_in_schema=False)
+async def register_form(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    invite_code: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    if settings.invite_code and invite_code != settings.invite_code:
+        return templates.TemplateResponse(
+            request, "register.html", status_code=400, context={"error": "Invalid invite code"}
+        )
+    result = await db.execute(select(User).where(User.username == username))
+    if result.scalar_one_or_none():
+        return templates.TemplateResponse(
+            request, "register.html", status_code=400, context={"error": "Username taken"}
+        )
+    user = User(username=username, hashed_password=hash_password(password))
+    db.add(user)
+    await db.commit()
+    return RedirectResponse("/", status_code=303)
 
 
 @app.post("/login", response_model=TokenResponse)

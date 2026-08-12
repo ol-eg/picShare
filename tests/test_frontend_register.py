@@ -58,4 +58,40 @@ async def test_register_form_submits_to_register(client):
     soup = await _register_soup(client)
     form = soup.find("form")
     assert form.get("method", "").lower() == "post"
-    assert form.get("action") == "/register"
+    assert form.get("action") == "/register/form"
+
+
+@pytest.mark.asyncio
+async def test_register_form_submission_creates_user(client):
+    resp = await client.post(
+        "/register/form",
+        data={"username": "carol", "password": "password123", "invite_code": "test-invite-42"},
+    )
+    assert resp.status_code == 303
+    assert resp.headers["location"] == "/"
+
+
+@pytest.mark.asyncio
+async def test_register_form_bad_invite_renders_error(client):
+    resp = await client.post(
+        "/register/form",
+        data={"username": "carol", "password": "password123", "invite_code": "wrong-code"},
+    )
+    assert resp.status_code == 400
+    soup = BeautifulSoup(resp.text, "html.parser")
+    assert "Invalid invite code" in soup.get_text()
+
+
+@pytest.mark.asyncio
+async def test_register_form_duplicate_username_renders_error(client):
+    await client.post(
+        "/register/form",
+        data={"username": "carol", "password": "password123", "invite_code": "test-invite-42"},
+    )
+    resp = await client.post(
+        "/register/form",
+        data={"username": "carol", "password": "password123", "invite_code": "test-invite-42"},
+    )
+    assert resp.status_code == 400
+    soup = BeautifulSoup(resp.text, "html.parser")
+    assert "Username taken" in soup.get_text()

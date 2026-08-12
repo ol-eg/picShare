@@ -35,8 +35,13 @@ Tests run inside the `app` container against a dedicated test DB
 (`db-test`) and set test-specific env vars (upload/thumb dirs, secret key).
 
 Lint and type-checking also run inside the `app` container. Source files
-(`app/`) and tests (`tests/`) are bind-mounted so the container always checks
-the live code on disk.
+(`app/`), tests (`tests/`), and migrations (`alembic/`) are bind-mounted so the
+container always sees the live code on disk.
+
+First-time DB setup: the `alembic/versions/` dir ships with an initial migration
+creating the `users`/`images` tables, so a fresh database just needs
+`make migrate`. `make migrate-auto` generates migration files straight into the
+bind-mounted `alembic/versions/`, so they land on disk automatically.
 
 ### Workflow — TDD
 We practice TDD here, always:

@@ -31,6 +31,7 @@ services:
     depends_on:
       - db
     volumes:
+      - ./alembic:/app/alembic
       - ./app:/app/app
       - ./tests:/app/tests
       - ./htmlcov:/app/htmlcov
