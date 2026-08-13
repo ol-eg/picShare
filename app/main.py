@@ -12,9 +12,7 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import create_token, get_current_user
@@ -38,10 +36,15 @@ from app.services import (
 from app.services import (
     list_images as list_images_service,
 )
+from app.views import (
+    redirect_home,
+    render_home,
+    render_login,
+    render_register,
+    render_register_error,
+)
 
 app = FastAPI(title="picShare", redoc_url=None)
-
-templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
 # ── Frontend ──
@@ -49,17 +52,17 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 @app.get("/", include_in_schema=False)
 async def homepage(request: Request):
-    return templates.TemplateResponse(request, "home.html")
+    return render_home(request)
 
 
 @app.get("/register", include_in_schema=False)
 async def register_page(request: Request):
-    return templates.TemplateResponse(request, "register.html")
+    return render_register(request)
 
 
 @app.get("/login", include_in_schema=False)
 async def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html")
+    return render_login(request)
 
 
 # ── Static files (serving images + local redoc bundle) ──
@@ -124,14 +127,10 @@ async def register_form(
     try:
         await register_user(db, username, password, invite_code)
     except InvalidInviteError:
-        return templates.TemplateResponse(
-            request, "register.html", status_code=400, context={"error": "Invalid invite code"}
-        )
+        return render_register_error(request, "Invalid invite code")
     except UsernameTakenError:
-        return templates.TemplateResponse(
-            request, "register.html", status_code=400, context={"error": "Username taken"}
-        )
-    return RedirectResponse("/", status_code=303)
+        return render_register_error(request, "Username taken")
+    return redirect_home()
 
 
 @app.post("/login", response_model=TokenResponse)

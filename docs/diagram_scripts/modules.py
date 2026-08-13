@@ -15,6 +15,7 @@ with Diagram(
         templates = Redis("templates/\n(Jinja2 HTML)")
         redoc = Redis("static/redoc_assets/\n(ReDoc bundle)")
         schemas = Python("schemas.py\n(Pydantic I/O)")
+        views = Python("views.py\n(presentations, pages)")
         auth = Python("auth.py\n(hashing, JWT)")
         img_utils = Python("image_utils.py\n(save, thumbnail)")
         models = Python("models.py\n(ORM: User, Image)")
@@ -22,12 +23,13 @@ with Diagram(
         repos = Python("repositories.py\n(data access)")
         services = Python("services.py\n(business logic)")
 
-        main >> Edge(label="Jinja2") >> templates
+        main >> Edge(label="Delegates") >> views
         main >> Edge(label="StaticFiles") >> redoc
         main >> Edge(label="Pydantic") >> schemas
         main >> Edge(label="Depends") >> auth
         main >> Edge(label="call") >> services
 
+        views >> Edge(label="Jinja2") >> templates
         services >> Edge(label="reuse") >> repos
         services >> Edge(label="Pillow") >> img_utils
         auth >> Edge(label="User lookup") >> repos
