@@ -17,11 +17,18 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import create_token, get_current_user, hash_password, verify_password
+from app.auth import create_token, get_current_user
 from app.database import get_db, settings
 from app.image_utils import save_upload
 from app.models import Image, User
 from app.schemas import ImageOut, ImageUpdate, TokenResponse, UserOut, UserRegister
+from app.services import (
+    InvalidCredentialsError,
+    InvalidInviteError,
+    UsernameTakenError,
+    login_user,
+    register_user,
+)
 
 app = FastAPI(title="picShare", redoc_url=None)
 
@@ -88,14 +95,12 @@ async def redoc():
 
 @app.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(body: UserRegister, db: AsyncSession = Depends(get_db)):
-    if settings.invite_code and body.invite_code != settings.invite_code:
+    try:
+        user = await register_user(db, body.username, body.password, body.invite_code or "")
+    except InvalidInviteError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid invite code")
-    result = await db.execute(select(User).where(User.username == body.username))
-    if result.scalar_one_or_none():
+    except UsernameTakenError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username taken")
-    user = User(username=body.username, hashed_password=hash_password(body.password))
-    db.add(user)
-    await db.commit()
     return TokenResponse(access_token=create_token(str(user.id)))
 
 
@@ -107,26 +112,24 @@ async def register_form(
     invite_code: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    if settings.invite_code and invite_code != settings.invite_code:
+    try:
+        await register_user(db, username, password, invite_code)
+    except InvalidInviteError:
         return templates.TemplateResponse(
             request, "register.html", status_code=400, context={"error": "Invalid invite code"}
         )
-    result = await db.execute(select(User).where(User.username == username))
-    if result.scalar_one_or_none():
+    except UsernameTakenError:
         return templates.TemplateResponse(
             request, "register.html", status_code=400, context={"error": "Username taken"}
         )
-    user = User(username=username, hashed_password=hash_password(password))
-    db.add(user)
-    await db.commit()
     return RedirectResponse("/", status_code=303)
 
 
 @app.post("/login", response_model=TokenResponse)
 async def login(body: UserRegister, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.username == body.username))
-    user = result.scalar_one_or_none()
-    if not user or not verify_password(body.password, user.hashed_password):
+    try:
+        user = await login_user(db, body.username, body.password)
+    except InvalidCredentialsError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bad credentials")
     return TokenResponse(access_token=create_token(str(user.id)))
 

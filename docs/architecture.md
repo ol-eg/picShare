@@ -13,6 +13,8 @@
 | Module / Directory | Role |
 |--------------------|------|
 | `main.py` | Route definitions, app entry point |
+| `services.py` | Business logic / domain rules (raises domain exceptions) |
+| `repositories.py` | Data access layer (wraps SQLAlchemy per entity) |
 | `models.py` | SQLAlchemy ORM models (`User`, `Image`) |
 | `schemas.py` | Pydantic request/response validation |
 | `auth.py` | Password hashing, JWT creation/verification |
@@ -25,9 +27,10 @@
 
 1. Request hits Uvicorn → FastAPI routes it to the matching handler
 2. Dependencies (`get_db`, `get_current_user`) run automatically
-3. Handler processes the request, talks to DB via SQLAlchemy
-4. FastAPI converts the ORM result to a Pydantic schema (validation)
-5. JSON response is sent back
+3. Handler (`main.py`) delegates to a service in `services.py`
+4. Service applies business rules, talking to the DB via a repository (`repositories.py`)
+5. FastAPI converts the ORM result to a Pydantic schema (validation)
+6. JSON response is sent back
 
 ## Auth flow
 

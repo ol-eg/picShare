@@ -19,12 +19,18 @@ with Diagram(
         img_utils = Python("image_utils.py\n(save, thumbnail)")
         models = Python("models.py\n(ORM: User, Image)")
         db = Python("database.py\n(engine, session)")
+        repos = Python("repositories.py\n(data access)")
+        services = Python("services.py\n(business logic)")
 
         main >> Edge(label="Jinja2") >> templates
         main >> Edge(label="StaticFiles") >> redoc
         main >> Edge(label="Pydantic") >> schemas
         main >> Edge(label="Depends") >> auth
         main >> Edge(label="Pillow") >> img_utils
+        main >> Edge(label="call") >> services
 
+        services >> Edge(label="reuse") >> repos
         auth >> Edge(label="User model") >> models
-        auth >> Edge(label="session") >> db
+
+        repos >> Edge(label="ORM") >> models
+        repos >> Edge(label="session") >> db
