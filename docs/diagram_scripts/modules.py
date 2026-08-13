@@ -26,10 +26,10 @@ with Diagram(
         main >> Edge(label="StaticFiles") >> redoc
         main >> Edge(label="Pydantic") >> schemas
         main >> Edge(label="Depends") >> auth
-        main >> Edge(label="Pillow") >> img_utils
         main >> Edge(label="call") >> services
 
         services >> Edge(label="reuse") >> repos
+        services >> Edge(label="Pillow") >> img_utils
         auth >> Edge(label="User model") >> models
 
         repos >> Edge(label="ORM") >> models

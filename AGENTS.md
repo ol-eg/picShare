@@ -50,6 +50,12 @@ We practice TDD here, always:
 3. Write the minimum code to make it pass (green)
 4. Rinse and repeat — small, iterative steps
 
+### How to run tests, lint, and type checking
+Prefer the `make` wrappers for the verification gates — `make test`,
+`make lint`, `make lint-fix`, and `make typecheck`. The user likes to run
+these themselves to see them in action and build confidence, so use the
+make targets rather than calling `docker compose exec ...` directly.
+
 Serve docs locally: `mkdocs serve -a 127.0.0.1:8001`
 
 ## Pre-commit checklist

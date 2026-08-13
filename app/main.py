@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 
 from fastapi import (
@@ -14,20 +15,28 @@ from fastapi import (
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import create_token, get_current_user
 from app.database import get_db, settings
-from app.image_utils import save_upload
-from app.models import Image, User
+from app.models import User
 from app.schemas import ImageOut, ImageUpdate, TokenResponse, UserOut, UserRegister
 from app.services import (
+    ImageNotFoundError,
     InvalidCredentialsError,
     InvalidInviteError,
+    NotImageOwnerError,
     UsernameTakenError,
+    create_image,
     login_user,
     register_user,
+    update_image_caption,
+)
+from app.services import (
+    delete_image as delete_image_service,
+)
+from app.services import (
+    list_images as list_images_service,
 )
 
 app = FastAPI(title="picShare", redoc_url=None)
@@ -153,56 +162,46 @@ async def upload_image(
     db: AsyncSession = Depends(get_db),
 ):
     contents = await file.read()
-    filename = save_upload(contents, file.filename or "image.jpg")
-    image = Image(
-        filename=filename,
+    image = await create_image(
+        db,
+        owner_id=user.id,
+        file_bytes=contents,
         original_name=file.filename or "",
         caption=caption,
-        owner_id=user.id,
     )
-    db.add(image)
-    await db.commit()
-    await db.refresh(image)
     return image
 
 
 @app.get("/images", response_model=list[ImageOut])
 async def list_images(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Image).order_by(Image.uploaded_at.desc()))
-    return result.scalars().all()
+    return await list_images_service(db)
 
 
 @app.patch("/images/{image_id}", response_model=ImageOut)
 async def update_image(
-    image_id: str,
+    image_id: uuid.UUID,
     body: ImageUpdate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Image).where(Image.id == image_id))
-    image = result.scalar_one_or_none()
-    if not image:
+    try:
+        image = await update_image_caption(db, image_id, body.caption, user_id=user.id)
+    except ImageNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    if image.owner_id != user.id:
+    except NotImageOwnerError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    if body.caption is not None:
-        image.caption = body.caption
-    await db.commit()
-    await db.refresh(image)
     return image
 
 
 @app.delete("/images/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_image(
-    image_id: str,
+    image_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Image).where(Image.id == image_id))
-    image = result.scalar_one_or_none()
-    if not image:
+    try:
+        await delete_image_service(db, image_id, user_id=user.id)
+    except ImageNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    if image.owner_id != user.id:
+    except NotImageOwnerError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    await db.delete(image)
-    await db.commit()
