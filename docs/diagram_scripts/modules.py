@@ -30,7 +30,7 @@ with Diagram(
 
         services >> Edge(label="reuse") >> repos
         services >> Edge(label="Pillow") >> img_utils
-        auth >> Edge(label="User model") >> models
+        auth >> Edge(label="User lookup") >> repos
 
         repos >> Edge(label="ORM") >> models
         repos >> Edge(label="session") >> db

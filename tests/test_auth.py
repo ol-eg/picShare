@@ -1,6 +1,16 @@
 import pytest
+from jose import jwt
+
+from app.database import settings
 
 INVITE_CODE = "test-invite-42"
+
+
+@pytest.mark.asyncio
+async def test_me_invalid_uuid_token(client):
+    token = jwt.encode({"sub": "not-a-uuid"}, settings.secret_key, algorithm="HS256")
+    resp = await client.get("/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

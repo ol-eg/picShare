@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from sqlalchemy import select
 
@@ -45,3 +47,18 @@ async def test_create_persists_row_in_db(session):
     await repo.create(session, username="carol", hashed_password=hash_password("pw"))
     result = await session.execute(select(User).where(User.username == "carol"))
     assert result.scalar_one_or_none() is not None
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_returns_user(session):
+    user = await repo.create(session, username="carol", hashed_password=hash_password("pw"))
+    found = await repo.get_by_id(session, user.id)
+    assert found is not None
+    assert found.id == user.id
+    assert found.username == "carol"
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_missing_returns_none(session):
+    found = await repo.get_by_id(session, uuid.uuid4())
+    assert found is None

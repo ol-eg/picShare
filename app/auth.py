@@ -1,12 +1,14 @@
+import uuid
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db, settings
 from app.models import User
+from app.repositories import UserRepository
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 security = HTTPBearer()
@@ -37,8 +39,11 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ) -> User:
     user_id = decode_token(credentials.credentials)
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
+    try:
+        parsed_id = uuid.UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    user = await UserRepository().get_by_id(db, parsed_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     return user
