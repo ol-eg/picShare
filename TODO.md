@@ -2,6 +2,23 @@
 
 Tracked items for future sessions. We practice small, incremental steps here.
 
+## Next session — Full browser auth (auto-login + working login/logout)
+
+**Decided 2026-08-14.** The highest-value real-user need. Current state:
+the frontend has **no auth mechanism at all** — auth is Bearer-token only, the
+`/login` page is a bare stub (no form), and nothing sets a cookie or stores a
+token. So today a user can register (form works → redirects home) but cannot
+log in and cannot stay authenticated. This blocks the app being usable.
+
+**Direction:** full browser auth — build the login page form, an httponly-cookie
+session so the browser stays authenticated, auto-login on /register/form
+success, and a logout path. Keep Bearer-token API auth intact (tests depend on
+`HTTPBearer`); add cookie-based frontend auth alongside it.
+
+Scope decision for the session: introduce a login cookie + a way to read it for
+`/me`, make register auto-login via the same cookie, finish the login template,
+add logout. Verify with `make test` / `make lint` / `make typecheck`.
+
 ## Architectural refactor: Decouple `main.py` from the database ✅ DONE
 
 **Goal:** remove direct DB access from `main.py` so handlers become thin
