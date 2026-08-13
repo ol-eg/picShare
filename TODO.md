@@ -2,22 +2,19 @@
 
 Tracked items for future sessions. We practice small, incremental steps here.
 
-## Architectural refactor: Decouple `main.py` from the database
+## Architectural refactor: Decouple `main.py` from the database ✅ DONE
 
 **Goal:** remove direct DB access from `main.py` so handlers become thin
 HTTP-routing-only code. Auth + images move to repository/service layers,
-matching (and correcting) the Module Coupling diagram.
+matching the Module Coupling diagram.
 
-**Decided scope (option 2):** Full repository + service layer, but done in
-smaller sub-steps — auth first, images in a later step. `main.py` will NOT be
-fully clean until the image step lands.
+**Approach:** full repository + service layer, done in small sub-steps — auth
+first, then images. `main.py` is now fully clean of direct DB access.
 
 ### Principles
 - TDD: write a failing test first, confirm RED, then the minimal code for GREEN.
 - Small steps, keep `make test` / `make lint` / `make typecheck` green throughout.
-- Preserve the JSON `/register` and `/login` API contract exactly (existing tests
-  must keep passing without edits to their assertions).
-- Add `user` to repo before model work.
+- Preserve existing API contracts exactly (existing tests pass without edits).
 
 ### Step 1 — Auth service + repositories ✅ DONE
 - `repositories.py` with `UserRepository`.
