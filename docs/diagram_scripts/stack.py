@@ -1,4 +1,4 @@
-from diagrams import Diagram, Cluster
+from diagrams import Diagram, Cluster, Edge
 from diagrams.onprem.client import User
 from diagrams.programming.framework import FastAPI
 from diagrams.onprem.database import PostgreSQL
@@ -21,11 +21,14 @@ with Diagram(
 
             app = FastAPI("FastAPI / Uvicorn\n(ASGI router)")
 
-            with Cluster("Backend Libraries"):
+            with Cluster("Service Layer\n(business logic)"):
+                services = Python("services.py\n(image upload, state)")
+                img_utils = Python("image_utils.py\n(thumbnail generation)")
+                auth_lib = Python("auth.py\nbcrypt + JWT")
+
+            with Cluster("Data Access Layer"):
+                repos = Python("repositories.py\n(DB access)")
                 orm = Python("SQLAlchemy / Alembic\n(async ORM + migrations)")
-                auth_lib = Python("bcrypt / passlib\n(password hashing)")
-                jwt_lib = Python("python-jose / JWT\n(token generation)")
-                img_lib = Python("Pillow\n(thumbnail generation)")
 
         with Cluster("picshare-db-1"):
             db = PostgreSQL("PostgreSQL 17")
@@ -34,9 +37,10 @@ with Diagram(
     dev >> app
     app >> frontend
     app >> api_docs
-    app >> orm
-    app >> auth_lib
-    app >> jwt_lib
-    app >> img_lib
-    orm >> asyncpg
+    app >> Edge(label="routes call") >> services
+    services >> Edge(label="save_upload") >> img_utils
+    services >> Edge(label="hashing/JWT") >> auth_lib
+    services >> repos
+    repos >> orm
+    orm >> Edge(label="queries") >> asyncpg
     asyncpg >> db
