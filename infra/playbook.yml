@@ -4,6 +4,7 @@
   vars:
     app_dir: /opt/picshare
     app_port: 80
+    ssh_port: 22
   become: yes
   tasks:
     - name: Install prerequisites
@@ -63,7 +64,13 @@
         state: directory
         mode: "0755"
 
-    - name: Open firewall port
+    - name: Allow SSH through the firewall
+      ansible.builtin.ufw:
+        rule: allow
+        port: "{{ ssh_port }}"
+        proto: tcp
+
+    - name: Open firewall port for the app
       ansible.builtin.ufw:
         rule: allow
         port: "{{ app_port }}"

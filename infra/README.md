@@ -29,6 +29,22 @@ After the playbook finishes you'll have two Docker containers running on the ser
 
 The app is reachable at **http://localhost** on the server itself.
 
+### Firewall
+
+The playbook enables **UFW** with a default-deny policy and explicitly allows:
+
+- **SSH** — port `22` (configurable via the `ssh_port` play variable)
+- the app — port `app_port` (default `80`)
+
+SSH is allowed **before** UFW is enabled, so you never lock yourself out of the
+box. If you lose SSH access anyway (e.g. you tweaked firewall rules by hand),
+use your provider's out-of-band console (DigitalOcean Droplet Console, Vultr
+VNC, Hetzner Console, …) and run:
+
+```bash
+sudo ufw allow 22/tcp
+```
+
 ## Making it accessible from the internet
 
 Your Debian server is on your home LAN (e.g. 192.168.0.X). To reach it from outside:
