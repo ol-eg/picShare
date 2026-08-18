@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     thumb_dir: str = "app/static/thumbnails"
     thumbnail_size: tuple[int, int] = (300, 300)
     invite_code: str | None = None
+    cookie_secure: bool = True
 
     model_config = {"env_prefix": "PICSHARE_"}
 

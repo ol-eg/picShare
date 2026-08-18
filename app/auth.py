@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -12,6 +12,11 @@ from app.repositories import UserRepository
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 security = HTTPBearer()
+SESSION_COOKIE = "picshare_session"
+
+
+def create_session_cookie(user_id: str) -> str:
+    return create_token(user_id)
 
 
 def hash_password(password: str) -> str:
@@ -46,4 +51,25 @@ async def get_current_user(
     user = await UserRepository().get_by_id(db, parsed_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    return user
+
+
+async def get_current_user_from_cookie(
+    request: Request, db: AsyncSession = Depends(get_db)
+) -> User | None:
+    return await read_session_cookie(request, db)
+
+
+async def read_session_cookie(request: Request, db: AsyncSession) -> User | None:
+    cookie = request.cookies.get(SESSION_COOKIE)
+    if not cookie:
+        return None
+    try:
+        payload = jwt.decode(cookie, settings.secret_key, algorithms=["HS256"])
+        parsed_id = uuid.UUID(payload["sub"])
+    except (JWTError, KeyError, ValueError):
+        return None
+    user = await UserRepository().get_by_id(db, parsed_id)
+    if not user:
+        return None
     return user

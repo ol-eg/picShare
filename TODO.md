@@ -2,22 +2,22 @@
 
 Tracked items for future sessions. We practice small, incremental steps here.
 
-## Next session — Full browser auth (auto-login + working login/logout)
+## Full browser auth (auto-login + working login/logout) ✅ DONE
 
-**Decided 2026-08-14.** The highest-value real-user need. Current state:
-the frontend has **no auth mechanism at all** — auth is Bearer-token only, the
-`/login` page is a bare stub (no form), and nothing sets a cookie or stores a
-token. So today a user can register (form works → redirects home) but cannot
-log in and cannot stay authenticated. This blocks the app being usable.
+**Decided 2026-08-14, completed 2026-08-18.** Previously the frontend had no
+auth mechanism — Bearer-only API auth, `/login` a bare stub, no cookie/token
+storage. Implemented httponly-cookie browser auth alongside the (untouched)
+Bearer API auth. Done in 6 small TDD steps, each verified with `make test` /
+`make lint` / `make typecheck`.
 
-**Direction:** full browser auth — build the login page form, an httponly-cookie
-session so the browser stays authenticated, auto-login on /register/form
-success, and a logout path. Keep Bearer-token API auth intact (tests depend on
-`HTTPBearer`); add cookie-based frontend auth alongside it.
+- ✅ `POST /register/form` sets the session cookie (auto-login on register)
+- ✅ `POST /login/form` sets the session cookie on success, error otherwise
+- ✅ `POST /logout` clears the cookie
+- ✅ `home.html` reflects logged-in state (username + logout vs login/register)
 
-Scope decision for the session: introduce a login cookie + a way to read it for
-`/me`, make register auto-login via the same cookie, finish the login template,
-add logout. Verify with `make test` / `make lint` / `make typecheck`.
+Cookie helpers in `app/auth.py`: `SESSION_COOKIE`, `create_session_cookie`,
+`read_session_cookie`, and the `get_current_user_from_cookie` dependency. Cookie
+value is the same signed JWT used by Bearer auth.
 
 ## Architectural refactor: Decouple `main.py` from the database ✅ DONE
 
@@ -48,9 +48,16 @@ first, then images. `main.py` is now fully clean of direct DB access.
 Items we should address in a future session, captured from code reviews and
 deferred decisions. Each has a short "why" for context. Not currently blocking.
 
-- **Auto-login on successful form registration.** After form registration
-  succeeds, set the auth cookie / redirect instead of requiring a separate login.
-  Deferred earlier to a dedicated step.
+- **Set `secure=True` on the session cookie.** ✅ DONE — now configurable via
+  `PICSHARE_COOKIE_SECURE` (defaults `true` in code; dev and prod compose files
+  set `false` because the app currently serves over plain HTTP). Flip the
+  compose `.env` value to `true` once HTTPS/TLS is in front of the app.
+- **Add a distinct `exp` to session tokens.** `create_token` produces a
+  non-expiring JWT used for both Bearer and cookie auth. A never-expiring login
+  cookie is a stale-session risk; consider a short-lived session token or a
+  server-side expiry. Deferred as a design decision.
+- **Logout UX polish.** Logout is a POST form (correct — state change), but a
+  graceful button (e.g. htmx POST) reads better than a bare form link.
 - **Upload hardening.** Validate `content_type` (whitelist `image/*`) and add a
   file-size cap before `save_upload`. Currently any file type/any size is
   accepted. Raised in local code review (Step 2).

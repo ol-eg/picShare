@@ -101,6 +101,7 @@
         db_password: "{{ (env_content.content | b64decode | regex_search('POSTGRES_PASSWORD=(.*)', '\\1') | first) | default('') }}"
         secret_key: "{{ (env_content.content | b64decode | regex_search('PICSHARE_SECRET_KEY=(.*)', '\\1') | first) | default('') }}"
         invite_code: "{{ (env_content.content | b64decode | regex_search('PICSHARE_INVITE_CODE=(.*)', '\\1') | first) | default('') }}"
+        cookie_secure: "{{ (env_content.content | b64decode | regex_search('PICSHARE_COOKIE_SECURE=(.*)', '\\1') | first) | default('false') }}"
         duckdns_token: "{{ (env_content.content | b64decode | regex_search('DUCKDNS_TOKEN=(.*)', '\\1') | first) | default('') }}"
       when: env_stat.stat.exists
       no_log: yes
@@ -137,6 +138,7 @@
         db_password: "{{ prompt_db.user_input }}"
         secret_key: "{{ prompt_key.user_input }}"
         invite_code: "{{ prompt_invite.user_input | default('') }}"
+        cookie_secure: false
         duckdns_token: "{{ prompt_duckdns.user_input | default('') }}"
       when: not env_stat.stat.exists
       no_log: yes
@@ -176,6 +178,7 @@
           PICSHARE_DATABASE_URL=postgresql+asyncpg://picshare:{{ db_password }}@db:5432/picshare
           PICSHARE_INVITE_CODE={{ invite_code }}
           PICSHARE_SECRET_KEY={{ secret_key }}
+          PICSHARE_COOKIE_SECURE={{ cookie_secure }}
           DUCKDNS_DOMAIN=mypish
           DUCKDNS_TOKEN={{ duckdns_token }}
         dest: "{{ env_file }}"

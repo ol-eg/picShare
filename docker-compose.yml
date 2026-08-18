@@ -28,6 +28,7 @@ services:
     environment:
       PICSHARE_DATABASE_URL: "postgresql+asyncpg://picshare:picshare@db:5432/picshare"
       PICSHARE_INVITE_CODE: "local-dev-invite"
+      PICSHARE_COOKIE_SECURE: "false"
     depends_on:
       - db
     volumes:

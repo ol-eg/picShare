@@ -54,7 +54,28 @@ Your app is then reachable at **http://mypish.duckdns.org** (no port needed).
 
 Get a free token at https://duckdns.org.
 
+## Environment variables
+
+The app reads configuration from environment variables (prefix `PICSHARE_`). On
+the server these live in `/opt/picshare/.env`, created by the playbook.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PICSHARE_DATABASE_URL` | — | SQLAlchemy async Postgres URL. Set by the playbook from the DB password. |
+| `PICSHARE_SECRET_KEY` | `change-me-in-production` (insecure!) | Signs JWTs and the session cookie. **Required to be set** — the playbook prompts for it on first deploy. |
+| `PICSHARE_INVITE_CODE` | unset | Registers are gated by this code. Empty = open registration. |
+| `PICSHARE_COOKIE_SECURE` | `true` | Marks the `picshare_session` cookie `Secure`. Defaults `true`, **but the playbook writes `false` because the app currently serves over plain HTTP.** |
+| `PICSHARE_THUMBNAIL_SIZE` | `300,300` | Thumbnail pixel size (power users only). |
+
+> **Secure-cookie note (important).** Browsers ignore a `Secure` cookie over
+> plain HTTP. This deployment serves the app over HTTP (port 80 /
+> `http://mypish.duckdns.org`), so the playbook sets
+> `PICSHARE_COOKIE_SECURE=false`. If you later put HTTPS/TLS in front, set it
+> to `true` (or delete `/opt/picshare/.env` and re-run to answer prompts).
+
 ## Iterating
+
+The simplest iteration — pull latest and re-deploy:
 
 ```bash
 git pull
@@ -64,6 +85,22 @@ ansible-playbook infra/playbook.yml
 The playbook rsyncs the source, rebuilds the image, and recreates the app
 container automatically. No manual cleanup needed — the DB container stays
 healthy and keeps all data.
+
+### When code depends on a new env var (this is one!)
+
+If a new release adds an env var the playbook doesn't already write, this
+iteration does **not** re-prompt for secrets — it reads the existing
+`/opt/picshare/.env` and appends the new variable only if the playbook knows
+about it. In particular, this change added `PICSHARE_COOKIE_SECURE`; on an
+existing server the playbook writes `false` (HTTP) unless the old `.env`
+already set it. To change it later:
+
+```bash
+sudo sed -i 's/^PICSHARE_COOKIE_SECURE=.*/PICSHARE_COOKIE_SECURE=true/' /opt/picshare/.env
+ansible-playbook infra/playbook.yml
+```
+
+### Full list of deploy env settable via prompts / .env
 
 Secrets are only prompted on **first deploy**. On subsequent runs the playbook
 reads existing values from `/opt/picshare/.env` and skips all prompts.

@@ -15,7 +15,7 @@ from fastapi import (
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import create_token, get_current_user
+from app.auth import SESSION_COOKIE, create_token, get_current_user, get_current_user_from_cookie
 from app.database import get_db, settings
 from app.models import User
 from app.schemas import ImageOut, ImageUpdate, TokenResponse, UserOut, UserRegister
@@ -40,6 +40,7 @@ from app.views import (
     redirect_home,
     render_home,
     render_login,
+    render_login_error,
     render_register,
     render_register_error,
 )
@@ -51,8 +52,11 @@ app = FastAPI(title="picShare", redoc_url=None)
 
 
 @app.get("/", include_in_schema=False)
-async def homepage(request: Request):
-    return render_home(request)
+async def homepage(
+    request: Request,
+    user: User | None = Depends(get_current_user_from_cookie),
+):
+    return render_home(request, user=user)
 
 
 @app.get("/register", include_in_schema=False)
@@ -125,12 +129,20 @@ async def register_form(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        await register_user(db, username, password, invite_code)
+        user = await register_user(db, username, password, invite_code)
     except InvalidInviteError:
         return render_register_error(request, "Invalid invite code")
     except UsernameTakenError:
         return render_register_error(request, "Username taken")
-    return redirect_home()
+    response = redirect_home()
+    response.set_cookie(
+        SESSION_COOKIE,
+        create_token(str(user.id)),
+        httponly=True,
+        samesite="lax",
+        secure=settings.cookie_secure,
+    )
+    return response
 
 
 @app.post("/login", response_model=TokenResponse)
@@ -140,6 +152,37 @@ async def login(body: UserRegister, db: AsyncSession = Depends(get_db)):
     except InvalidCredentialsError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bad credentials")
     return TokenResponse(access_token=create_token(str(user.id)))
+
+
+@app.post("/login/form", include_in_schema=False)
+async def login_form(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        user = await login_user(db, username, password)
+    except InvalidCredentialsError:
+        return render_login_error(request, "Invalid credentials")
+    response = redirect_home()
+    response.set_cookie(
+        SESSION_COOKIE,
+        create_token(str(user.id)),
+        httponly=True,
+        samesite="lax",
+        secure=settings.cookie_secure,
+    )
+    return response
+
+
+@app.post("/logout", include_in_schema=False)
+async def logout():
+    response = redirect_home()
+    response.delete_cookie(
+        SESSION_COOKIE, httponly=True, samesite="lax", secure=settings.cookie_secure
+    )
+    return response
 
 
 # ── Users ──

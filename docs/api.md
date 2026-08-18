@@ -9,7 +9,7 @@ Both are auto-generated from the Python code — no manual sync needed.
 
 ---
 
-## Endpoint overview
+## Endpoint overview (JSON API)
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -20,6 +20,26 @@ Both are auto-generated from the Python code — no manual sync needed.
 | GET | `/images` | No | List all images |
 | PATCH | `/images/{id}` | Yes | Update caption (owner only) |
 | DELETE | `/images/{id}` | Yes | Delete image (owner only) |
+
+## Browser routes (form-based, cookie session)
+
+These are the HTML routes the browser uses. They are excluded from the OpenAPI
+schema (`include_in_schema=False`) and authenticate via an `httponly` cookie
+named `picshare_session` (same signed JWT as Bearer auth), not the
+`Authorization` header.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | Cookie optional | Home page; shows login/register or the signed-in user + logout |
+| GET | `/register` | No | Render registration form |
+| POST | `/register/form` | No | Register; on success sets the session cookie (auto-login) and redirects home |
+| GET | `/login` | No | Render login form |
+| POST | `/login/form` | No | Login; on success sets the session cookie and redirects home |
+| POST | `/logout` | Cookie optional | Clears the session cookie and redirects home |
+
+The session cookie is set with `HttpOnly` + `SameSite=lax`; it is *not* set with
+`Secure`, so cookie sessions work over plain HTTP in dev (enable `secure` in
+production).
 
 ## Static file URLs
 

@@ -23,6 +23,7 @@ services:
       PICSHARE_DATABASE_URL: ${PICSHARE_DATABASE_URL}
       PICSHARE_INVITE_CODE: ${PICSHARE_INVITE_CODE}
       PICSHARE_SECRET_KEY: ${PICSHARE_SECRET_KEY}
+      PICSHARE_COOKIE_SECURE: ${PICSHARE_COOKIE_SECURE}
     depends_on:
       db:
         condition: service_healthy
