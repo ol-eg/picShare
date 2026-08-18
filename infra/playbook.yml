@@ -105,11 +105,11 @@
 
     - name: Set defaults from existing .env
       ansible.builtin.set_fact:
-        db_password: "{{ (env_content.content | b64decode | regex_search('POSTGRES_PASSWORD=(.*)', '\\1') | first) | default('') }}"
-        secret_key: "{{ (env_content.content | b64decode | regex_search('PICSHARE_SECRET_KEY=(.*)', '\\1') | first) | default('') }}"
-        invite_code: "{{ (env_content.content | b64decode | regex_search('PICSHARE_INVITE_CODE=(.*)', '\\1') | first) | default('') }}"
-        cookie_secure: "{{ (env_content.content | b64decode | regex_search('PICSHARE_COOKIE_SECURE=(.*)', '\\1') | first) | default('false') }}"
-        duckdns_token: "{{ (env_content.content | b64decode | regex_search('DUCKDNS_TOKEN=(.*)', '\\1') | first) | default('') }}"
+        db_password: "{{ (env_content.content | b64decode | regex_search('POSTGRES_PASSWORD=(.*)', '\\1') | default(['']) | first) }}"
+        secret_key: "{{ (env_content.content | b64decode | regex_search('PICSHARE_SECRET_KEY=(.*)', '\\1') | default(['']) | first) }}"
+        invite_code: "{{ (env_content.content | b64decode | regex_search('PICSHARE_INVITE_CODE=(.*)', '\\1') | default(['']) | first) }}"
+        cookie_secure: "{{ (env_content.content | b64decode | regex_search('PICSHARE_COOKIE_SECURE=(.*)', '\\1') | default(['false']) | first) }}"
+        duckdns_token: "{{ (env_content.content | b64decode | regex_search('DUCKDNS_TOKEN=(.*)', '\\1') | default(['']) | first) }}"
       when: env_stat.stat.exists
       no_log: yes
 
