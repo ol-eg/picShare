@@ -55,8 +55,10 @@ app = FastAPI(title="picShare", redoc_url=None)
 async def homepage(
     request: Request,
     user: User | None = Depends(get_current_user_from_cookie),
+    db: AsyncSession = Depends(get_db),
 ):
-    return render_home(request, user=user)
+    images = await list_images_service(db)
+    return render_home(request, user=user, images=images)
 
 
 @app.get("/register", include_in_schema=False)

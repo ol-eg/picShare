@@ -4,13 +4,19 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
-from app.models import User
+from app.models import Image, User
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
-def render_home(request: Request, user: User | None = None) -> Response:
-    return templates.TemplateResponse(request, "home.html", context={"user": user})
+def render_home(
+    request: Request,
+    user: User | None = None,
+    images: list[Image] | None = None,
+) -> Response:
+    return templates.TemplateResponse(
+        request, "home.html", context={"user": user, "images": images or []}
+    )
 
 
 def render_register(request: Request) -> Response:

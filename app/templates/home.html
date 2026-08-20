@@ -16,4 +16,21 @@
   </div>
   {% endif %}
 </section>
+
+{% if images %}
+<section class="max-w-4xl mx-auto px-4 pb-16">
+  <h2 class="text-2xl font-bold text-gray-900 mb-4">Gallery</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    {% for image in images %}
+    <figure class="rounded overflow-hidden shadow">
+      <img src="/thumbnails/{{ image.filename }}" alt="{{ image.original_name or image.filename }}"
+           class="w-full h-40 object-cover">
+      {% if image.caption %}
+      <figcaption class="p-2 text-sm text-gray-700">{{ image.caption }}</figcaption>
+      {% endif %}
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 {% endblock %}
