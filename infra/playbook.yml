@@ -209,6 +209,12 @@
       retries: 15
       delay: 2
 
+    - name: Apply database migrations
+      community.docker.docker_container_exec:
+        container: picshare-app-1
+        command: alembic upgrade head
+        argv: []
+
     - name: Install DuckDNS updater script
       ansible.builtin.copy:
         dest: /opt/picshare/duckdns.sh

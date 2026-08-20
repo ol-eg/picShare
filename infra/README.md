@@ -102,9 +102,23 @@ The playbook rsyncs the source, rebuilds the image, and recreates the app
 container automatically. No manual cleanup needed — the DB container stays
 healthy and keeps all data.
 
-### When code depends on a new env var (this is one!)
+### Migrations run automatically
 
-If a new release adds an env var the playbook doesn't already write, this
+Since the playbook runs on the server, applying the initial (and any pending)
+DB migrations is now part of the deploy: after building and starting the
+containers, the playbook runs `alembic upgrade head` inside the running app
+container, so the `users`/`images` tables (and any future schema changes) are
+created automatically. No manual `docker compose exec ... alembic upgrade head`
+is needed on first deploy or on upgrade.
+
+> **Historical note.** Before the migration task was added, first-time deploys
+> left the `picshare` database empty (no `users`/`images` tables), which caused
+> `Internal Server Error` on login/register. An existing prod deployment created
+> with the old playbook needs a one-off `docker compose exec app alembic upgrade
+> head` in `/opt/picshare` to create the tables. From then on the playbook keeps
+> them in sync.
+
+### When code depends on a new env var (this is one!)
 iteration does **not** re-prompt for secrets — it reads the existing
 `/opt/picshare/.env` and appends the new variable only if the playbook knows
 about it. In particular, this change added `PICSHARE_COOKIE_SECURE`; on an

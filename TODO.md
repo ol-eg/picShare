@@ -48,6 +48,32 @@ first, then images. `main.py` is now fully clean of direct DB access.
 Items we should address in a future session, captured from code reviews and
 deferred decisions. Each has a short "why" for context. Not currently blocking.
 
+- **Prod registration/login `Internal server error` — ROOT CAUSE FOUND, FIXED IN
+  PLAYBOOK.** The Ansible playbook never ran DB migrations, so prod's `picshare`
+  database had no `users`/`images` tables (dev has them via `make migrate`),
+  causing `relation "users" does not exist` → 500. Fixed by adding an
+  `alembic upgrade head` task to `infra/playbook.yml`. Existing prod deploys
+  need a manual one-off `docker compose exec app alembic upgrade head`.
+  Resolved 2026-08-20.
+
+- **Pin the Postgres image tag for production predictability.** `docker-compose.yml`
+  uses the floating `postgres:17-alpine` tag. A newer tagged image pulled in on
+  deploy would silently recreate the DB container (changing its `CREATED` time
+  and introducing churn). Pin to a specific patch (`postgres:17.x-alpine`) or a
+  digest and bump deliberately. Logged 2026-08-20.
+
+### Next session — 2 topics to discuss & attempt
+
+Logged 2026-08-19.
+
+- **Bot traffic on the prod server.** Ongoing "harmless" bot hits are wasted CPU
+  on the box. Discuss/decide a mitigation — e.g. block obvious bot UAs, rate
+  limiting, fail2ban/UFW rules, or a WAF. Think it through, don't rush.
+- **HTTPS for prod.** Browser shows a prominent "Not secure / DANGEROUS" badge on
+  the address line. Big topic; want real TLS in front of the app (reverse
+  proxy / letsencrypt / certbot + UFW 443). Just planned + a todo for now, not
+  started. Flipping `PICSHARE_COOKIE_SECURE=true` depends on this.
+
 - **Set `secure=True` on the session cookie.** ✅ DONE — now configurable via
   `PICSHARE_COOKIE_SECURE` (defaults `true` in code; dev and prod compose files
   set `false` because the app currently serves over plain HTTP). Flip the
