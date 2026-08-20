@@ -36,3 +36,11 @@ async def test_home_logged_in_shows_image_thumbnails(client, session):
     img = soup.find("img", src="/thumbnails/abc.jpg")
     assert img is not None, "Expected a thumbnail for the uploaded image on the homepage"
     assert "Sunset" in soup.get_text()
+
+
+@pytest.mark.asyncio
+async def test_home_with_no_images_shows_empty_state(client):
+    resp = await client.get("/")
+    assert resp.status_code == 200
+    soup = BeautifulSoup(resp.text, "html.parser")
+    assert "No photos yet" in soup.get_text()
