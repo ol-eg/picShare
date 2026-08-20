@@ -1,4 +1,4 @@
-.PHONY: up test testd down-build migrate migrate-auto lint lint-fix typecheck
+.PHONY: up test testd down-build migrate migrate-auto lint lint-fix typecheck traffic
 
 DC = docker compose
 EXEC = $(DC) exec -e PICSHARE_TEST_DB_HOST=db-test \
@@ -38,3 +38,6 @@ lint-fix: up
 
 typecheck: up
 	$(DC) exec app mypy app
+
+traffic:
+	sudo docker logs picshare-app-1 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+' | sed 's/:.*//' | sort | uniq -c | sort -rn

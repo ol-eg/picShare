@@ -62,17 +62,18 @@ deferred decisions. Each has a short "why" for context. Not currently blocking.
   and introducing churn). Pin to a specific patch (`postgres:17.x-alpine`) or a
   digest and bump deliberately. Logged 2026-08-20.
 
-### Next session — 2 topics to discuss & attempt
+- **HTTPS for prod.** Browser shows a prominent "Not secure / DANGEROUS" badge on
+  the address line. Want real TLS in front of the app (reverse proxy /
+  letsencrypt / certbot + UFW 443). Deferred 2026-08-20 — not pressing. When
+  done, flip `PICSHARE_COOKIE_SECURE` to `true`.
+
+### Next session — 1 topic to discuss & attempt
 
 Logged 2026-08-19.
 
 - **Bot traffic on the prod server.** Ongoing "harmless" bot hits are wasted CPU
   on the box. Discuss/decide a mitigation — e.g. block obvious bot UAs, rate
   limiting, fail2ban/UFW rules, or a WAF. Think it through, don't rush.
-- **HTTPS for prod.** Browser shows a prominent "Not secure / DANGEROUS" badge on
-  the address line. Big topic; want real TLS in front of the app (reverse
-  proxy / letsencrypt / certbot + UFW 443). Just planned + a todo for now, not
-  started. Flipping `PICSHARE_COOKIE_SECURE=true` depends on this.
 
 - **Set `secure=True` on the session cookie.** ✅ DONE — now configurable via
   `PICSHARE_COOKIE_SECURE` (defaults `true` in code; dev and prod compose files
