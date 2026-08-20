@@ -44,3 +44,29 @@ async def test_home_with_no_images_shows_empty_state(client):
     assert resp.status_code == 200
     soup = BeautifulSoup(resp.text, "html.parser")
     assert "No photos yet" in soup.get_text()
+
+
+@pytest.mark.asyncio
+async def test_home_anonymous_does_not_show_signed_in_empty_state_cta(client):
+    resp = await client.get("/")
+    assert resp.status_code == 200
+    soup = BeautifulSoup(resp.text, "html.parser")
+    assert "be the first to share one" not in soup.get_text()
+
+
+@pytest.mark.asyncio
+async def test_home_after_logout_does_not_show_signed_in_empty_state_cta(client):
+    await client.post(
+        "/register/form",
+        data={
+            "username": "postlogout",
+            "password": "password123",
+            "invite_code": INVITE_CODE,
+        },
+    )
+    await client.post("/logout")
+
+    resp = await client.get("/")
+    assert resp.status_code == 200
+    soup = BeautifulSoup(resp.text, "html.parser")
+    assert "be the first to share one" not in soup.get_text()

@@ -35,7 +35,11 @@
 {% else %}
 <section class="max-w-4xl mx-auto px-4 pb-16">
   <h2 class="text-2xl font-bold text-gray-900 mb-4">Gallery</h2>
+  {% if user %}
   <p class="text-gray-600">No photos yet — be the first to share one.</p>
+  {% else %}
+  <p class="text-gray-600">No photos yet.</p>
+  {% endif %}
 </section>
 {% endif %}
 {% endblock %}
