@@ -69,11 +69,27 @@ deferred decisions. Each has a short "why" for context. Not currently blocking.
 
 ### Next session — 1 topic to discuss & attempt
 
-Logged 2026-08-19.
+- **Browser upload form for pictures.** Login-gated gallery exists (see below),
+  and `POST /images` works via API with Bearer auth, but there's no browser UI
+  to add a photo. Add an "Upload" entry point visible only to logged-in users,
+  a form page, and wiring so a submitted image appears in the gallery. TDD:
+  RED test for logged-in "Upload" entry point → form page → submit behavior →
+  gallery-listing-after-upload. Public upload is NOT wanted — only
+  authenticated users share photos. Planned 2026-08-20.
 
-- **Bot traffic on the prod server.** Ongoing "harmless" bot hits are wasted CPU
-  on the box. Discuss/decide a mitigation — e.g. block obvious bot UAs, rate
-  limiting, fail2ban/UFW rules, or a WAF. Think it through, don't rush.
+## Gallery access + empty state ✅ DONE
+
+**Completed 2026-08-20.** The gallery is now login-only: anonymous/logged-out
+visitors see only the hero + Log in/Register buttons (no gallery, no empty
+state). Logged-in users see the image grid when photos exist, or the
+"No photos yet — be the first to share one." CTA when empty. Locked in with
+TDD tests (`tests/test_frontend_gallery.py`), commits `b1e7258`, `53e3776`,
+`9eb941c`.
+
+## Backlog
+
+Items we should address in a future session, captured from code reviews and
+deferred decisions. Each has a short "why" for context. Not currently blocking.
 
 - **Set `secure=True` on the session cookie.** ✅ DONE — now configurable via
   `PICSHARE_COOKIE_SECURE` (defaults `true` in code; dev and prod compose files
