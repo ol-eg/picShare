@@ -50,6 +50,24 @@ We practice TDD here, always:
 3. Write the minimum code to make it pass (green)
 4. Rinse and repeat — small, iterative steps
 
+### DRY — three strikes
+Follow the informal rule **three strikes, then refactor**: when the same
+code is repeated three or more times, extract it rather than copying it
+again. This applies across the whole codebase, production code and tests
+alike. Prefer a single shared helper or constant over re-typing the setup.
+
+Notable shared test fixtures/constants live in `tests/conftest.py`:
+- `session_client` — an `AsyncClient` already logged in via the session
+  cookie (registers a fresh user with `SESSION_USERNAME`/`SESSION_PASSWORD`).
+  Use it when a test just needs "some logged-in user" and doesn't care who.
+- `auth_headers` — bearer-token auth headers for the JSON/JWT API flows.
+- `INVITE_CODE`, `SESSION_USERNAME`, `SESSION_PASSWORD` — import these from
+  `conftest` rather than redefining locally.
+
+Don't force a shared helper where it obscures intent: code that specifically
+exercises a mechanism's edge cases (bad input, duplicates, cookie details) or
+asserts on a *specific* value should keep its own explicit setup.
+
 ### How to run tests, lint, and type checking
 Prefer the `make` wrappers for the verification gates — `make test`,
 `make lint`, `make lint-fix`, and `make typecheck`. The user likes to run
