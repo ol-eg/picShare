@@ -12,6 +12,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,6 +44,7 @@ from app.views import (
     render_login_error,
     render_register,
     render_register_error,
+    render_upload,
 )
 
 app = FastAPI(title="picShare", redoc_url=None)
@@ -69,6 +71,37 @@ async def register_page(request: Request):
 @app.get("/login", include_in_schema=False)
 async def login_page(request: Request):
     return render_login(request)
+
+
+@app.get("/upload", include_in_schema=False)
+async def upload_page(
+    request: Request,
+    user: User | None = Depends(get_current_user_from_cookie),
+):
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+    return render_upload(request)
+
+
+@app.post("/upload", include_in_schema=False)
+async def upload_submit(
+    request: Request,
+    file: UploadFile = File(...),
+    caption: str = Form(None),
+    user: User | None = Depends(get_current_user_from_cookie),
+    db: AsyncSession = Depends(get_db),
+):
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+    contents = await file.read()
+    await create_image(
+        db,
+        owner_id=user.id,
+        file_bytes=contents,
+        original_name=file.filename or "",
+        caption=caption,
+    )
+    return redirect_home()
 
 
 # ── Static files (serving images + local redoc bundle) ──

@@ -5,3 +5,5 @@ htmlcov/
 .coverage
 infra/.vault_pass
 *.swp
+app/static/uploads/
+app/static/thumbnails/

@@ -67,15 +67,45 @@ deferred decisions. Each has a short "why" for context. Not currently blocking.
   letsencrypt / certbot + UFW 443). Deferred 2026-08-20 — not pressing. When
   done, flip `PICSHARE_COOKIE_SECURE` to `true`.
 
-### Next session — 1 topic to discuss & attempt
+## Browser upload form for pictures ✅ DONE
 
-- **Browser upload form for pictures.** Login-gated gallery exists (see below),
-  and `POST /images` works via API with Bearer auth, but there's no browser UI
-  to add a photo. Add an "Upload" entry point visible only to logged-in users,
-  a form page, and wiring so a submitted image appears in the gallery. TDD:
-  RED test for logged-in "Upload" entry point → form page → submit behavior →
-  gallery-listing-after-upload. Public upload is NOT wanted — only
-  authenticated users share photos. Planned 2026-08-20.
+**Completed 2026-08-21, TDD in 3 small steps.** Added a login-only browser
+flow to share photos, alongside the existing Bearer `POST /images` API.
+
+- ✅ "Upload" entry point — a button on the homepage visible only to logged-in
+  users (anonymous visitors don't see it)
+- ✅ `GET /upload` form page (multipart file + optional caption), login-required
+  (anonymous → 303 redirect to `/login`)
+- ✅ `POST /upload` submit handler — delegates to the existing `create_image`
+  service, redirects home on success; anonymous → redirect to `/login`
+- ✅ A submitted image appears in the gallery after redirect
+
+Tests in `tests/test_frontend_upload.py`, verified with `make test` /
+`make lint` / `make typecheck` after each step.
+
+**Deferred (see Backlog):** upload hardening (content-type whitelist +
+size cap) and offloading Pillow/image I/O off the event loop.
+
+## Next session — View the full image
+
+**Decided 2026-08-21.** Currently the gallery shows only a thumbnail and there
+is no browser way to view the original image. Build a login-only image detail
+page so users can open a photo from the gallery.
+
+Planned steps (small TDD increments, each verified with `make test` /
+`make lint` / `make typecheck`):
+
+- **Step 1 — Detail page scaffold.** Gallery thumbnails link to
+  `GET /images/{id}` (browser view, `include_in_schema=False`), login-required
+  (anonymous → `/login`). Page shows the full-size image (the existing
+  `/uploads/{filename}` static mount serves it), caption, uploader, date.
+- **Step 2 — (optional) delete.** A login-only "Delete" action wired to the
+  existing `DELETE /images/{id}` service (owner-only). Ties into the existing
+  "delete leaves files on disk" backlog question.
+- **Not planned here:** browser caption editing — see Backlog below.
+
+Both the `PATCH`/`DELETE` services and the image shown at `/uploads/{filename}`
+already exist, so this extends the browser UI in the same TDD rhythm as upload.
 
 ## Gallery access + empty state ✅ DONE
 
@@ -114,6 +144,10 @@ deferred decisions. Each has a short "why" for context. Not currently blocking.
 - **Add `max_length` on image captions.** `ImageUpdate.caption` has no length
   limit and the DB column is unbounded `Text` — a DoS vector for large
   captions. Raised in local code review (Step 2).
+- **Browser caption editing.** `PATCH /images/{id}` and `update_image_caption`
+  exist (owner-only), but there's no browser UI to edit a caption. Deferred
+  decision 2026-08-21 — optional; would pair naturally with an image detail
+  page (see the "View the full image" section above).
 - **Handle delete leaving files on disk.** `delete_image` removes the DB row
   but not the uploaded file/thumbnail on disk. Confirm intended, then either
   document it or clean up files on delete.

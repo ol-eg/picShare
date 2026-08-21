@@ -33,6 +33,10 @@ def render_login_error(request: Request, error: str) -> Response:
     )
 
 
+def render_upload(request: Request, error: str | None = None) -> Response:
+    return templates.TemplateResponse(request, "upload.html", context={"error": error})
+
+
 def render_register_error(request: Request, error: str) -> Response:
     return templates.TemplateResponse(
         request, "register.html", status_code=400, context={"error": error}
