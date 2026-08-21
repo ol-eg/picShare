@@ -1,8 +1,6 @@
-import io
 import uuid
 
 import pytest
-from PIL import Image as PILImage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
@@ -15,15 +13,9 @@ from app.services import (
     list_images,
     update_image_caption,
 )
+from tests.conftest import tiny_jpeg
 
 images_repo = ImageRepository()
-
-
-def _tiny_jpeg() -> bytes:
-    buf = io.BytesIO()
-    im = PILImage.new("RGB", (1, 1), color="red")
-    im.save(buf, format="JPEG")
-    return buf.getvalue()
 
 
 async def _make_user(session: AsyncSession) -> User:
@@ -38,7 +30,7 @@ async def _make_image(session: AsyncSession, user: User):
     return await create_image(
         session,
         owner_id=user.id,
-        file_bytes=_tiny_jpeg(),
+        file_bytes=tiny_jpeg(),
         original_name="a.jpg",
         images_repo=images_repo,
     )
@@ -50,7 +42,7 @@ async def test_create_image_returns_image(session):
     image = await create_image(
         session,
         owner_id=user.id,
-        file_bytes=_tiny_jpeg(),
+        file_bytes=tiny_jpeg(),
         original_name="photo.jpg",
         caption="Hello",
         images_repo=images_repo,

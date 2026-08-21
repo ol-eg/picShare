@@ -1,6 +1,8 @@
 import pytest
 from bs4 import BeautifulSoup
 
+from tests.conftest import INVITE_CODE
+
 
 async def _register_soup(client) -> BeautifulSoup:
     resp = await client.get("/register")
@@ -65,7 +67,7 @@ async def test_register_form_submits_to_register(client):
 async def test_register_form_submission_creates_user(client):
     resp = await client.post(
         "/register/form",
-        data={"username": "carol", "password": "password123", "invite_code": "test-invite-42"},
+        data={"username": "carol", "password": "password123", "invite_code": INVITE_CODE},
     )
     assert resp.status_code == 303
     assert resp.headers["location"] == "/"
@@ -86,11 +88,11 @@ async def test_register_form_bad_invite_renders_error(client):
 async def test_register_form_duplicate_username_renders_error(client):
     await client.post(
         "/register/form",
-        data={"username": "carol", "password": "password123", "invite_code": "test-invite-42"},
+        data={"username": "carol", "password": "password123", "invite_code": INVITE_CODE},
     )
     resp = await client.post(
         "/register/form",
-        data={"username": "carol", "password": "password123", "invite_code": "test-invite-42"},
+        data={"username": "carol", "password": "password123", "invite_code": INVITE_CODE},
     )
     assert resp.status_code == 400
     soup = BeautifulSoup(resp.text, "html.parser")

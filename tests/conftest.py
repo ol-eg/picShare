@@ -1,10 +1,15 @@
+import io
 import os
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from PIL import Image
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from starlette.requests import Request
+from starlette.types import Scope
 
+from app.auth import SESSION_COOKIE
 from app.database import get_db
 from app.main import app
 from app.models import Base
@@ -15,6 +20,34 @@ TEST_DB_URL = f"postgresql+asyncpg://picshare:picshare@{TEST_DB_HOST}:5432/picsh
 INVITE_CODE = "test-invite-42"
 SESSION_USERNAME = "session_user"
 SESSION_PASSWORD = "password123"
+
+
+def make_session_request(cookie: str | None = None) -> Request:
+    scope: Scope = {"type": "http", "method": "GET", "path": "/", "headers": []}
+    if cookie is not None:
+        scope["headers"].append((b"cookie", f"{SESSION_COOKIE}={cookie}".encode()))
+
+    async def receive() -> dict:
+        return {}
+
+    return Request(scope, receive=receive)
+
+
+def session_cookie_value(set_cookie_header: str) -> str:
+    payload = set_cookie_header.split(";")[0]
+    name, value = payload.split("=", 1)
+    assert name == SESSION_COOKIE
+    return value
+
+
+def tiny_jpeg() -> bytes:
+    buf = io.BytesIO()
+    im = Image.new("RGB", (1, 1), color="red")
+    im.save(buf, format="JPEG")
+    return buf.getvalue()
+
+
+TINY_JPEG = tiny_jpeg()
 
 
 @pytest.fixture
@@ -72,7 +105,7 @@ async def session_client(client: AsyncClient) -> AsyncClient:
 async def auth_headers(client: AsyncClient) -> dict:
     resp = await client.post(
         "/register",
-        json={"username": "testuser", "password": "secret123", "invite_code": "test-invite-42"},
+        json={"username": "testuser", "password": "secret123", "invite_code": INVITE_CODE},
     )
     token = resp.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

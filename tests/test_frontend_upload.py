@@ -1,18 +1,7 @@
-import io
-
 import pytest
 from bs4 import BeautifulSoup
-from PIL import Image
 
-
-def _tiny_jpeg() -> bytes:
-    buf = io.BytesIO()
-    im = Image.new("RGB", (1, 1), color="red")
-    im.save(buf, format="JPEG")
-    return buf.getvalue()
-
-
-TINY_JPEG = _tiny_jpeg()
+from tests.conftest import TINY_JPEG
 
 
 @pytest.mark.asyncio

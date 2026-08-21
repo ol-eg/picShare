@@ -1,27 +1,8 @@
 import pytest
 from bs4 import BeautifulSoup
-from starlette.requests import Request
-from starlette.types import Scope
 
 from app.auth import SESSION_COOKIE, read_session_cookie
-from tests.conftest import INVITE_CODE
-
-
-def _cookie_value(set_cookie_header: str) -> str:
-    payload = set_cookie_header.split(";")[0]
-    name, value = payload.split("=", 1)
-    assert name == SESSION_COOKIE
-    return value
-
-
-def _make_request(cookie: str) -> Request:
-    scope: Scope = {"type": "http", "method": "GET", "path": "/", "headers": []}
-    scope["headers"].append((b"cookie", f"{SESSION_COOKIE}={cookie}".encode()))
-
-    async def receive() -> dict:
-        return {}
-
-    return Request(scope, receive=receive)
+from tests.conftest import INVITE_CODE, make_session_request, session_cookie_value
 
 
 @pytest.mark.asyncio
@@ -51,8 +32,8 @@ async def test_register_form_cookie_logs_in_user(client, session):
         },
     )
     assert resp.status_code == 303
-    token = _cookie_value(resp.headers["set-cookie"])
-    request = _make_request(token)
+    token = session_cookie_value(resp.headers["set-cookie"])
+    request = make_session_request(token)
     user = await read_session_cookie(request, db=session)
     assert user is not None
     assert user.username == "bob"

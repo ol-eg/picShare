@@ -1,17 +1,6 @@
-import io
-
 import pytest
-from PIL import Image
 
-
-def _tiny_jpeg() -> bytes:
-    buf = io.BytesIO()
-    im = Image.new("RGB", (1, 1), color="red")
-    im.save(buf, format="JPEG")
-    return buf.getvalue()
-
-
-TINY_JPEG = _tiny_jpeg()
+from tests.conftest import INVITE_CODE, TINY_JPEG
 
 
 @pytest.mark.asyncio
@@ -102,7 +91,7 @@ async def test_delete_other_users_image(client, auth_headers):
 
     resp = await client.post(
         "/register",
-        json={"username": "other", "password": "secret123", "invite_code": "test-invite-42"},
+        json={"username": "other", "password": "secret123", "invite_code": INVITE_CODE},
     )
     other_token = resp.json()["access_token"]
     other_headers = {"Authorization": f"Bearer {other_token}"}
