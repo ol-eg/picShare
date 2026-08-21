@@ -5,8 +5,7 @@ from starlette.types import Scope
 from app.auth import SESSION_COOKIE, create_session_cookie, get_current_user_from_cookie
 from app.repositories import UserRepository
 from app.services import register_user
-
-INVITE_CODE = "test-invite-42"
+from tests.conftest import INVITE_CODE
 
 
 def _make_request(cookie: str | None = None) -> Request:

@@ -2,8 +2,7 @@ import pytest
 from jose import jwt
 
 from app.database import settings
-
-INVITE_CODE = "test-invite-42"
+from tests.conftest import INVITE_CODE
 
 
 @pytest.mark.asyncio

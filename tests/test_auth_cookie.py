@@ -9,8 +9,7 @@ from app.auth import (
 )
 from app.repositories import UserRepository
 from app.services import register_user
-
-INVITE_CODE = "test-invite-42"
+from tests.conftest import INVITE_CODE
 
 
 def _make_request(cookie: str | None = None) -> Request:

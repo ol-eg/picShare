@@ -4,8 +4,7 @@ from starlette.requests import Request
 from starlette.types import Scope
 
 from app.auth import SESSION_COOKIE, read_session_cookie
-
-INVITE_CODE = "test-invite-42"
+from tests.conftest import INVITE_CODE
 
 
 async def _login_soup(client) -> BeautifulSoup:

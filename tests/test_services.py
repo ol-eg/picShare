@@ -10,8 +10,7 @@ from app.services import (
     login_user,
     register_user,
 )
-
-INVITE_CODE = "test-invite-42"
+from tests.conftest import INVITE_CODE
 
 repo = UserRepository()
 
