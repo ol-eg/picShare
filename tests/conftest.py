@@ -12,6 +12,10 @@ from app.models import Base
 TEST_DB_HOST = os.environ.get("PICSHARE_TEST_DB_HOST", "localhost")
 TEST_DB_URL = f"postgresql+asyncpg://picshare:picshare@{TEST_DB_HOST}:5432/picshare_test"
 
+INVITE_CODE = "test-invite-42"
+SESSION_USERNAME = "session_user"
+SESSION_PASSWORD = "password123"
+
 
 @pytest.fixture
 async def engine():
@@ -48,6 +52,20 @@ async def client(session):
         yield ac
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def session_client(client: AsyncClient) -> AsyncClient:
+    resp = await client.post(
+        "/register/form",
+        data={
+            "username": SESSION_USERNAME,
+            "password": SESSION_PASSWORD,
+            "invite_code": INVITE_CODE,
+        },
+    )
+    assert resp.status_code == 303
+    return client
 
 
 @pytest.fixture

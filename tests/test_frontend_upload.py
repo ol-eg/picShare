@@ -4,8 +4,6 @@ import pytest
 from bs4 import BeautifulSoup
 from PIL import Image
 
-INVITE_CODE = "test-invite-42"
-
 
 def _tiny_jpeg() -> bytes:
     buf = io.BytesIO()
@@ -25,16 +23,8 @@ async def test_upload_entry_point_hidden_for_anonymous(client):
 
 
 @pytest.mark.asyncio
-async def test_upload_entry_point_visible_for_logged_in(client):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "uploader",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-    resp = await client.get("/")
+async def test_upload_entry_point_visible_for_logged_in(session_client):
+    resp = await session_client.get("/")
     soup = BeautifulSoup(resp.text, "html.parser")
     assert soup.find("a", href="/upload") is not None
 
@@ -47,16 +37,8 @@ async def test_upload_page_redirects_anonymous_to_login(client):
 
 
 @pytest.mark.asyncio
-async def test_upload_page_for_logged_in_renders_form(client):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "formuploader",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-    resp = await client.get("/upload")
+async def test_upload_page_for_logged_in_renders_form(session_client):
+    resp = await session_client.get("/upload")
     assert resp.status_code == 200
     soup = BeautifulSoup(resp.text, "html.parser")
     form = soup.find("form", attrs={"enctype": "multipart/form-data"})
@@ -66,16 +48,8 @@ async def test_upload_page_for_logged_in_renders_form(client):
 
 
 @pytest.mark.asyncio
-async def test_upload_submit_logged_in_redirects_and_shows_in_gallery(client):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "submitter",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-    resp = await client.post(
+async def test_upload_submit_logged_in_redirects_and_shows_in_gallery(session_client):
+    resp = await session_client.post(
         "/upload",
         files={"file": ("beach.jpg", TINY_JPEG, "image/jpeg")},
         data={"caption": "A beach"},
@@ -83,7 +57,7 @@ async def test_upload_submit_logged_in_redirects_and_shows_in_gallery(client):
     assert resp.status_code in (302, 303)
     assert resp.headers["location"] == "/"
 
-    resp = await client.get("/")
+    resp = await session_client.get("/")
     assert resp.status_code == 200
     soup = BeautifulSoup(resp.text, "html.parser")
     assert "A beach" in soup.get_text()

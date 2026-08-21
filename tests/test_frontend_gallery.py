@@ -5,22 +5,14 @@ from sqlalchemy import select
 
 from app.main import app
 from app.models import Image, User
-
-INVITE_CODE = "test-invite-42"
+from tests.conftest import SESSION_USERNAME
 
 
 @pytest.mark.asyncio
-async def test_home_logged_in_shows_image_thumbnails(client, session):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "gallery",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-
-    user = (await session.execute(select(User).where(User.username == "gallery"))).scalar_one()
+async def test_home_logged_in_shows_image_thumbnails(session_client, session):
+    user = (
+        await session.execute(select(User).where(User.username == SESSION_USERNAME))
+    ).scalar_one()
 
     session.add(
         Image(
@@ -32,7 +24,7 @@ async def test_home_logged_in_shows_image_thumbnails(client, session):
     )
     await session.commit()
 
-    resp = await client.get("/")
+    resp = await session_client.get("/")
     assert resp.status_code == 200
     soup = BeautifulSoup(resp.text, "html.parser")
     img = soup.find("img", src="/thumbnails/abc.jpg")
@@ -41,16 +33,8 @@ async def test_home_logged_in_shows_image_thumbnails(client, session):
 
 
 @pytest.mark.asyncio
-async def test_home_logged_in_with_no_images_shows_empty_state_cta(client):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "emptystate",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-    resp = await client.get("/")
+async def test_home_logged_in_with_no_images_shows_empty_state_cta(session_client):
+    resp = await session_client.get("/")
     assert resp.status_code == 200
     soup = BeautifulSoup(resp.text, "html.parser")
     assert "be the first to share one" in soup.get_text()
@@ -68,16 +52,10 @@ async def test_home_anonymous_shows_only_login_and_register(client):
 
 
 @pytest.mark.asyncio
-async def test_home_anonymous_hides_gallery_even_with_images(client, session):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "seedonly",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-    user = (await session.execute(select(User).where(User.username == "seedonly"))).scalar_one()
+async def test_home_anonymous_hides_gallery_even_with_images(session_client, session):
+    user = (
+        await session.execute(select(User).where(User.username == SESSION_USERNAME))
+    ).scalar_one()
     session.add(
         Image(
             filename="seed.jpg",
@@ -97,18 +75,10 @@ async def test_home_anonymous_hides_gallery_even_with_images(client, session):
 
 
 @pytest.mark.asyncio
-async def test_home_after_logout_shows_only_login_and_register(client):
-    await client.post(
-        "/register/form",
-        data={
-            "username": "postlogout",
-            "password": "password123",
-            "invite_code": INVITE_CODE,
-        },
-    )
-    await client.post("/logout")
+async def test_home_after_logout_shows_only_login_and_register(session_client):
+    await session_client.post("/logout")
 
-    resp = await client.get("/")
+    resp = await session_client.get("/")
     assert resp.status_code == 200
     soup = BeautifulSoup(resp.text, "html.parser")
     assert "Log in" in soup.get_text()
